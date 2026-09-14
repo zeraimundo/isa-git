@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070b1f">
+  <title>Introdução a Sistemas Abertos | Filesystem Hierarchy Standard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap');
+    :root{
+      --bg:#070b1f;--panel:#111a3fdd;--panel2:#172153ee;
+      --cyan:#22d3ee;--blue:#3b82f6;--violet:#8b5cf6;--pink:#ec4899;
+      --green:#34d399;--yellow:#fbbf24;--red:#fb7185;
+      --text:#f8fafc;--muted:#cbd5e1;--soft:#94a3b8;--line:#334155;
+      --code:#0b1228;--shadow:0 24px 60px rgba(0,0,0,.36);--radius:26px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;overflow:hidden;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    button,a{font:inherit}
+    body:before{content:"";position:fixed;inset:0;background:
+      radial-gradient(circle at 12% 18%,rgba(34,211,238,.20),transparent 32%),
+      radial-gradient(circle at 78% 12%,rgba(139,92,246,.22),transparent 30%),
+      radial-gradient(circle at 65% 86%,rgba(59,130,246,.18),transparent 36%),
+      linear-gradient(135deg,#070b1f,#0b102b 55%,#090a20);z-index:-3}
+    .particles{position:fixed;inset:0;z-index:-2;opacity:.52;background-image:radial-gradient(circle,rgba(255,255,255,.34) 1px,transparent 1px);background-size:44px 44px;animation:drift 24s linear infinite}
+    @keyframes drift{to{transform:translate3d(-44px,-44px,0)}}
+    .aurora{position:fixed;width:52vw;height:52vw;left:-18vw;bottom:-28vw;background:conic-gradient(from 180deg,rgba(34,211,238,.25),rgba(139,92,246,.08),rgba(236,72,153,.17),rgba(34,211,238,.25));filter:blur(70px);border-radius:50%;z-index:-2;animation:pulse 10s ease-in-out infinite alternate}
+    @keyframes pulse{to{transform:translate(15vw,-7vw) scale(1.2)}}
+
+    .topbar{position:fixed;top:0;left:0;right:0;height:62px;display:flex;align-items:center;gap:16px;padding:10px 22px;background:rgba(5,10,31,.80);backdrop-filter:blur(18px);border-bottom:1px solid rgba(148,163,184,.18);z-index:10}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.2px;white-space:nowrap}
+    .brand .logo{width:40px;height:40px;border-radius:15px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;box-shadow:0 0 28px rgba(34,211,238,.35)}
+    .brand small{color:var(--soft);font-weight:800}
+    .progressWrap{flex:1;height:10px;border-radius:999px;background:rgba(148,163,184,.18);overflow:hidden}
+    .progress{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue),var(--violet));box-shadow:0 0 22px rgba(34,211,238,.5);transition:width .35s ease}
+    .counter{color:var(--muted);font-size:14px;font-weight:800;min-width:90px;text-align:center}
+    .topbtn{border:1px solid rgba(148,163,184,.2);background:rgba(15,23,42,.68);color:var(--text);border-radius:999px;padding:9px 12px;font-weight:800;cursor:pointer;transition:.2s;text-decoration:none}
+    .topbtn:hover,.topbtn:focus-visible{border-color:var(--cyan);transform:translateY(-1px);box-shadow:0 0 0 4px rgba(34,211,238,.10)}
+
+    #deck{height:100vh;width:100vw;position:relative}
+    .slide{position:absolute;inset:62px 0 72px;padding:36px 56px;display:none;opacity:0;overflow:hidden}
+    .slide.active{display:block;opacity:1;animation:enter .42s ease both}
+    @keyframes enter{from{filter:blur(7px);opacity:0;transform:translateY(16px) scale(.988)}to{filter:blur(0);opacity:1;transform:none}}
+    .slideContent{height:100%;max-width:1280px;margin:0 auto;display:flex;flex-direction:column}
+    .kicker{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;padding:8px 13px;border-radius:999px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.30);color:#a5f3fc;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
+    .title{font-size:clamp(42px,5.4vw,78px);line-height:.98;margin:18px 0 16px;font-weight:950;letter-spacing:-.045em}
+    .grad{background:linear-gradient(90deg,#fff,var(--cyan),#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .subtitle{font-size:clamp(21px,2.2vw,30px);color:var(--muted);line-height:1.42;max-width:980px}
+    .sectionTitle{font-size:clamp(32px,3.7vw,54px);line-height:1.04;margin:0 0 16px;font-weight:950;letter-spacing:-.035em}
+    .lead{font-size:clamp(18px,1.5vw,23px);line-height:1.48;color:var(--muted);max-width:1020px}
+    .split{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center}
+    .grid{display:grid;gap:18px}
+    .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:linear-gradient(180deg,rgba(15,23,42,.82),rgba(17,24,61,.86));border:1px solid rgba(148,163,184,.19);box-shadow:var(--shadow);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden}
+    .card:after{content:"";position:absolute;inset:auto -30% -55% -30%;height:80%;background:radial-gradient(circle,rgba(34,211,238,.10),transparent 58%);pointer-events:none}
+    .card h3{margin:0 0 9px;font-size:24px}
+    .card p{margin:0;color:var(--muted);font-size:17px;line-height:1.42}
+    .card code,.lead code,.callout code,.folderInfo code{font-family:"Fira Code",monospace;color:#a5f3fc}
+    .mini{font-size:15px;color:var(--soft);line-height:1.4}
+    .icon{font-size:34px;width:58px;height:58px;border-radius:19px;display:grid;place-items:center;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.24);margin-bottom:13px}
+    .bigIcon{font-size:92px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.36))}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:9px 13px;border-radius:999px;background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.22);font-weight:900;color:#dbeafe}
+    .chips{display:flex;gap:10px;flex-wrap:wrap}
+    .callout{border-left:5px solid var(--cyan);background:linear-gradient(90deg,rgba(34,211,238,.12),rgba(139,92,246,.08));padding:18px 22px;border-radius:20px;color:var(--muted);font-size:19px;line-height:1.42}
+    .warning{border-left-color:var(--yellow);background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(251,113,133,.06))}
+    .terminal{background:linear-gradient(180deg,#0b1020,#050816);border:1px solid rgba(148,163,184,.22);border-radius:22px;box-shadow:0 22px 45px rgba(0,0,0,.35);overflow:hidden;font-family:"Fira Code",Consolas,monospace}
+    .terminal .bar{height:40px;background:#111827;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid rgba(148,163,184,.15)}
+    .dot{width:12px;height:12px;border-radius:999px;background:#fb7185}.dot:nth-child(2){background:#fbbf24}.dot:nth-child(3){background:#34d399}
+    .terminal pre{margin:0;padding:18px;font-size:17px;line-height:1.48;white-space:pre-wrap;color:#e5e7eb}
+    .prompt{color:#34d399}.cmd{color:#60a5fa}.out{color:#cbd5e1}.warn{color:#fbbf24}.hl{color:#22d3ee;font-weight:900}
+    .matrix{display:grid;grid-template-columns:150px 1fr 1fr;gap:10px;align-items:stretch;margin-top:18px}
+    .matrix>div{padding:17px;border-radius:18px;background:rgba(15,23,42,.76);border:1px solid rgba(148,163,184,.20)}
+    .matrix .head{display:grid;place-items:center;text-align:center;font-weight:900;color:#a5f3fc}
+    .matrix h3{margin:0 0 7px;font-size:21px}.matrix p{margin:0;color:var(--muted);line-height:1.4}
+    .folderGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:18px 0}
+    .folderBtn{padding:12px 8px;border-radius:15px;border:1px solid rgba(148,163,184,.24);background:rgba(15,23,42,.78);color:#dbeafe;font:800 16px "Fira Code",monospace;cursor:pointer}
+    .folderBtn:hover,.folderBtn.active{background:linear-gradient(135deg,rgba(34,211,238,.34),rgba(139,92,246,.34));border-color:var(--cyan);color:#fff}
+    .folderInfo{min-height:145px;padding:20px 22px;border-radius:22px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.24);font-size:18px;line-height:1.45;color:var(--muted)}
+    .folderInfo h3{font:900 27px "Fira Code",monospace;color:#a5f3fc;margin:0 0 9px}
+    .dirList{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+    .dirItem{padding:13px 15px;border-radius:17px;background:rgba(15,23,42,.72);border:1px solid rgba(148,163,184,.20)}
+    .dirItem b{font:800 16px "Fira Code",monospace;color:#a5f3fc;display:block;margin-bottom:5px}
+    .dirItem span{font-size:14px;line-height:1.35;color:var(--muted)}
+    .decision{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+    .decision button{padding:17px;border-radius:20px;border:1px solid rgba(148,163,184,.22);background:rgba(15,23,42,.78);color:var(--text);cursor:pointer;text-align:left}
+    .decision button:hover{border-color:var(--cyan)}
+    .decision code{display:block;color:#a5f3fc;font-size:18px;margin-bottom:5px}
+    .decisionFeedback{margin-top:14px;min-height:72px;padding:14px 18px;border-radius:17px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.28);color:var(--muted);font-size:17px;line-height:1.4}
+
+    .nav{position:fixed;left:0;right:0;bottom:0;height:72px;background:rgba(5,10,31,.84);backdrop-filter:blur(18px);border-top:1px solid rgba(148,163,184,.18);display:flex;align-items:center;justify-content:center;gap:18px;z-index:10}
+    .nav button{border:1px solid rgba(148,163,184,.2);border-radius:999px;padding:13px 20px;background:rgba(15,23,42,.9);color:var(--text);font-weight:950;cursor:pointer}
+    .nav button:hover{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(34,211,238,.10)}
+    .nav button.primary{background:linear-gradient(90deg,var(--blue),var(--violet));border:0}
+    .nav button:disabled{opacity:.35;cursor:not-allowed}
+    .dots{display:flex;gap:6px;align-items:center;max-width:390px;overflow:hidden}
+    .sdot{width:8px;height:8px;border-radius:999px;background:rgba(148,163,184,.35);transition:.2s;flex:0 0 auto}
+    .sdot.active{width:26px;background:var(--cyan)}
+    .modal{position:fixed;inset:0;background:rgba(2,6,23,.86);backdrop-filter:blur(18px);display:none;z-index:30;padding:74px 42px}
+    .modal.active{display:block}
+    .modalBox{max-width:1120px;margin:0 auto;background:linear-gradient(180deg,rgba(15,23,42,.98),rgba(17,24,61,.98));border:1px solid rgba(148,163,184,.22);border-radius:32px;padding:28px;box-shadow:var(--shadow);max-height:calc(100vh - 140px);overflow:auto}
+    .modalHeader{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+    .close{border:1px solid rgba(148,163,184,.24);background:rgba(15,23,42,.9);color:#fff;border-radius:999px;padding:10px 14px;font-weight:900;cursor:pointer}
+    .overviewGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .thumb{min-height:108px;border-radius:20px;background:rgba(15,23,42,.84);border:1px solid rgba(148,163,184,.22);padding:15px;cursor:pointer}
+    .thumb:hover{border-color:var(--cyan);transform:translateY(-2px)}
+    .thumb b{display:block;margin-bottom:7px;color:#a5f3fc}
+    .sourceLink{display:block;color:#a5f3fc;margin:12px 0;word-break:break-word}
+    .quizBox{max-width:1040px;margin:0 auto}
+    .option{display:block;width:100%;margin:10px 0;padding:14px 17px;border-radius:17px;background:rgba(15,23,42,.76);border:1px solid rgba(148,163,184,.22);cursor:pointer;font-size:18px;text-align:left;color:var(--text)}
+    .option:hover{border-color:var(--cyan)}
+    .option.correct{background:rgba(52,211,153,.16);border-color:var(--green)}
+    .option.wrong{background:rgba(251,113,133,.14);border-color:var(--red)}
+    .quizExplain{display:none;margin-top:12px;padding:13px 16px;border-radius:16px;background:rgba(34,211,238,.09);border:1px solid rgba(34,211,238,.22);color:var(--muted);font-size:16px;line-height:1.38}
+    .quizNav{display:flex;justify-content:space-between;gap:12px;margin-top:15px}
+    .quizNav button,.restart{border:1px solid rgba(148,163,184,.24);border-radius:999px;padding:11px 15px;background:rgba(15,23,42,.88);color:#fff;font-weight:900;cursor:pointer}
+    .quizNav .active,.restart{background:linear-gradient(90deg,var(--blue),var(--violet));border:0}
+    .resultBadge{font-size:42px;font-weight:950}
+
+    @media(max-width:980px){
+      .slide{padding:26px 18px;overflow:auto}.grid2,.grid3,.grid4,.split,.matrix,.dirList{grid-template-columns:1fr}
+      .folderGrid{grid-template-columns:repeat(3,1fr)}.overviewGrid{grid-template-columns:1fr 1fr}
+      .topbar{gap:8px;padding:8px 10px}.topbtn span{display:none}.counter{min-width:58px}
+      .nav{gap:8px}.nav button{padding:11px 13px}.dots{display:none}.terminal pre{font-size:14px}
+      .title{font-size:43px}.sectionTitle{font-size:34px}.matrix .head{min-height:52px}
+    }
+    @media(max-width:560px){.brand small{display:none}.brand>div>div{max-width:150px;overflow:hidden;text-overflow:ellipsis}.folderGrid{grid-template-columns:repeat(2,1fr)}.overviewGrid{grid-template-columns:1fr}.modal{padding:70px 12px}.decision{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+    @media print{html,body{height:auto;overflow:visible;background:#fff;color:#111}.particles,.aurora,.topbar,.nav,.modal{display:none!important}.slide{position:relative;display:block!important;opacity:1!important;inset:auto;height:100vh;page-break-after:always;background:#070b1f;color:#fff}.slideContent{max-width:none}}
+  </style>
+</head>
+<body>
+  <div class="particles"></div><div class="aurora"></div>
+  <header class="topbar">
+    <div class="brand"><div class="logo">🐧</div><div><div>Introdução a Sistemas Abertos</div><small>FHS e diretórios Linux</small></div></div>
+    <div class="progressWrap"><div class="progress" id="progress"></div></div>
+    <div class="counter" id="counter">1 / 24</div>
+    <a class="topbtn" href="index.html" title="Voltar ao portal">⌂ <span>Portal</span></a>
+    <button class="topbtn" onclick="openModal('overview')">☷ <span>Visão geral</span></button>
+    <button class="topbtn" onclick="openModal('sources')">☑ <span>Fontes</span></button>
+    <button class="topbtn" onclick="openModal('help')">? <span>Ajuda</span></button>
+    <button class="topbtn" onclick="toggleFull()" title="Tela cheia">⛶</button>
+  </header>
+
+  <main id="deck">
+    <section class="slide active" data-title="Abertura">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">IFPB • Engenharia de Software • 2026.2</span>
+          <h1 class="title"><span class="grad">FHS</span><br>O mapa do sistema Linux</h1>
+          <p class="subtitle">Filesystem Hierarchy Standard: por que cada tipo de arquivo possui um lugar esperado na árvore de diretórios.</p>
+          <div class="chips" style="margin-top:28px"><span class="pill">🌳 Hierarquia</span><span class="pill">📁 Diretórios</span><span class="pill">🔧 Administração</span></div>
+          <p class="mini" style="margin-top:26px">Prof. José Raimundo • Use ← → para navegar</p>
+        </div>
+        <div class="card" style="min-height:460px;display:grid;place-items:center">
+          <div class="terminal" style="width:92%">
+            <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <pre><span class="prompt">aluno@linux:~$</span> <span class="cmd">ls</span> /
+<span class="out">bin   boot  dev   etc   home  lib
+media mnt   opt   proc  root  run
+sbin  srv   sys   tmp   usr   var</span>
+
+<span class="prompt">aluno@linux:~$</span> <span class="cmd">man</span> hier
+<span class="hl">Uma árvore. Funções bem definidas.</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Objetivos">
+      <div class="slideContent">
+        <span class="kicker">Mapa da aula</span>
+        <h2 class="sectionTitle">Objetivos de aprendizagem</h2>
+        <div class="grid grid4" style="margin-top:22px">
+          <div class="card"><div class="icon">🧭</div><h3>Interpretar</h3><p>Explicar por que o Linux organiza seus arquivos em uma única árvore iniciada em <code>/</code>.</p></div>
+          <div class="card"><div class="icon">📂</div><h3>Localizar</h3><p>Associar programas, configurações, bibliotecas e dados aos diretórios corretos.</p></div>
+          <div class="card"><div class="icon">🧠</div><h3>Distinguir</h3><p>Separar dados estáticos de variáveis e dados compartilháveis de dados locais.</p></div>
+          <div class="card"><div class="icon">⌨️</div><h3>Investigar</h3><p>Usar comandos para observar montagens, links, uso de disco e conteúdo da hierarquia.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Conceito de FHS">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">Filesystem Hierarchy Standard</span>
+          <h2 class="sectionTitle">Um acordo sobre onde os arquivos devem ficar</h2>
+          <p class="lead">O FHS define requisitos e orientações para posicionar arquivos e diretórios em sistemas semelhantes ao UNIX. O padrão facilita a interoperabilidade entre programas, ferramentas administrativas, scripts e documentação.</p>
+          <div class="callout" style="margin-top:24px"><b>Ideia central:</b> um administrador consegue prever onde procurar uma configuração, um executável, um log ou uma biblioteca, mesmo em outro computador.</div>
+        </div>
+        <div class="card">
+          <div class="bigIcon" style="text-align:center">🌳</div>
+          <h3 style="font-size:34px;text-align:center">Tudo começa em /</h3>
+          <p style="font-size:20px;text-align:center">Discos, partições e sistemas virtuais aparecem integrados em pontos de montagem dentro da mesma árvore.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Importância">
+      <div class="slideContent">
+        <span class="kicker">Por que estudar o FHS</span>
+        <h2 class="sectionTitle">Previsibilidade reduz erros e acelera a administração</h2>
+        <div class="grid grid2" style="margin-top:18px">
+          <div class="card"><div class="icon">🔎</div><h3>Diagnóstico</h3><p>Logs costumam estar em <code>/var/log</code>, configurações em <code>/etc</code> e informações de processos em <code>/proc</code>.</p></div>
+          <div class="card"><div class="icon">📦</div><h3>Pacotes e aplicações</h3><p>Gerenciadores de pacotes seguem caminhos conhecidos. Isso reduz conflitos entre programas e arquivos locais.</p></div>
+          <div class="card"><div class="icon">🛟</div><h3>Inicialização e recuperação</h3><p>Arquivos essenciais permanecem disponíveis quando outros sistemas de arquivos ainda não foram montados.</p></div>
+          <div class="card"><div class="icon">🤖</div><h3>Scripts e automação</h3><p>Caminhos previsíveis permitem que rotinas administrativas funcionem em máquinas diferentes.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Quatro classes de dados">
+      <div class="slideContent">
+        <span class="kicker">Lógica do padrão</span>
+        <h2 class="sectionTitle">Dados estáticos, variáveis, compartilháveis e locais</h2>
+        <div class="matrix">
+          <div></div><div class="head">Compartilháveis entre máquinas</div><div class="head">Específicos desta máquina</div>
+          <div class="head">Estáticos</div>
+          <div><h3>/usr e /opt</h3><p>Programas, bibliotecas e documentação que mudam principalmente durante instalações ou atualizações.</p></div>
+          <div><h3>/etc e /boot</h3><p>Configuração do host e arquivos ligados à inicialização deste sistema.</p></div>
+          <div class="head">Variáveis</div>
+          <div><h3>/var/mail</h3><p>Dados que mudam durante o uso e podem ser compartilhados conforme o serviço.</p></div>
+          <div><h3>/var/log e /run</h3><p>Logs, estado persistente e informações da sessão atual de inicialização.</p></div>
+        </div>
+        <p class="mini" style="margin-top:15px">A classificação orienta particionamento, backup, montagem somente leitura e compartilhamento em rede.</p>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Mapa da raiz">
+      <div class="slideContent">
+        <span class="kicker">Exploração interativa</span>
+        <h2 class="sectionTitle">Diretórios comuns sob a raiz /</h2>
+        <p class="lead">Clique em um diretório para consultar sua função principal.</p>
+        <div class="folderGrid" id="folderGrid"></div>
+        <div class="folderInfo" id="folderInfo"><h3>/</h3>A raiz contém toda a hierarquia. Aplicações não devem criar novos diretórios diretamente nela sem uma necessidade cuidadosamente avaliada.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/bin e /sbin">
+      <div class="slideContent">
+        <span class="kicker">Comandos essenciais</span>
+        <h2 class="sectionTitle"><span class="grad">/bin</span> e <span class="grad">/sbin</span></h2>
+        <div class="grid grid2" style="margin-top:20px">
+          <div class="card"><div class="icon">⌨️</div><h3>/bin</h3><p>Comandos essenciais usados por usuários e administradores. O sistema pode precisar deles durante inicialização ou recuperação.</p><div class="chips" style="margin-top:16px"><span class="pill">cat</span><span class="pill">cp</span><span class="pill">ls</span><span class="pill">sh</span></div></div>
+          <div class="card"><div class="icon">🧰</div><h3>/sbin</h3><p>Programas essenciais de administração, restauração e reparo do sistema.</p><div class="chips" style="margin-top:16px"><span class="pill">fsck</span><span class="pill">reboot</span><span class="pill">shutdown</span></div></div>
+        </div>
+        <div class="callout warning" style="margin-top:24px"><b>Linux atual:</b> muitas distribuições usam a fusão de <code>/usr</code>. Nelas, <code>/bin</code> e <code>/sbin</code> são links para <code>/usr/bin</code> e <code>/usr/sbin</code>.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/boot e /run">
+      <div class="slideContent">
+        <span class="kicker">Inicialização e sessão atual</span>
+        <h2 class="sectionTitle"><span class="grad">/boot</span> prepara a partida, <span class="grad">/run</span> registra o estado atual</h2>
+        <div class="grid grid2" style="margin-top:20px">
+          <div class="card"><div class="icon">🚀</div><h3>/boot</h3><p>Arquivos estáticos usados no processo de inicialização, como kernel, initramfs e dados do carregador de boot.</p><div class="terminal" style="margin-top:16px"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">ls</span> /boot
+<span class="out">vmlinuz-*  initrd.img-*  grub/</span></pre></div></div>
+          <div class="card"><div class="icon">⏱️</div><h3>/run</h3><p>Dados variáveis associados aos processos em execução desde o último boot, como PID files, sockets e estado temporário de serviços.</p><div class="terminal" style="margin-top:16px"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">findmnt</span> /run
+<span class="out">TARGET SOURCE FSTYPE
+/run   tmpfs  tmpfs</span></pre></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/dev">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">Dispositivos como arquivos</span>
+          <h2 class="sectionTitle"><span class="grad">/dev</span></h2>
+          <p class="lead">Contém arquivos especiais que representam dispositivos ou interfaces do sistema. O kernel e o gerenciador de dispositivos mantêm grande parte desse conteúdo dinamicamente.</p>
+          <div class="callout" style="margin-top:22px"><b>Exemplos:</b> <code>/dev/sda</code> pode representar um disco, <code>/dev/tty</code> um terminal e <code>/dev/null</code> descarta os dados recebidos.</div>
+        </div>
+        <div class="terminal">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <pre><span class="prompt">aluno@linux:~$</span> <span class="cmd">ls</span> -l /dev/null /dev/zero
+<span class="out">crw-rw-rw- 1 root root 1, 3 /dev/null
+crw-rw-rw- 1 root root 1, 5 /dev/zero</span>
+
+<span class="prompt">aluno@linux:~$</span> <span class="cmd">echo</span> teste &gt; /dev/null
+<span class="hl">saída descartada</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/etc">
+      <div class="slideContent">
+        <span class="kicker">Configuração do computador</span>
+        <h2 class="sectionTitle"><span class="grad">/etc</span>: configurações específicas do host</h2>
+        <p class="lead">O FHS reserva esse diretório para arquivos estáticos que controlam programas e serviços. Executáveis binários não pertencem a <code>/etc</code>.</p>
+        <div class="dirList">
+          <div class="dirItem"><b>/etc/passwd</b><span>Contas de usuários e dados básicos</span></div>
+          <div class="dirItem"><b>/etc/group</b><span>Definições dos grupos locais</span></div>
+          <div class="dirItem"><b>/etc/hosts</b><span>Mapeamentos locais de nomes e endereços</span></div>
+          <div class="dirItem"><b>/etc/ssh/</b><span>Configurações do cliente e servidor SSH</span></div>
+          <div class="dirItem"><b>/etc/systemd/</b><span>Configurações locais e unidades do systemd</span></div>
+          <div class="dirItem"><b>/etc/apt/</b><span>Fontes e regras do APT em Debian e Ubuntu</span></div>
+        </div>
+        <div class="callout warning" style="margin-top:18px"><b>Boa prática:</b> faça cópia do arquivo antes de editar e valide a sintaxe quando o serviço oferecer uma ferramenta de teste.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/home e /root">
+      <div class="slideContent">
+        <span class="kicker">Espaços dos usuários</span>
+        <h2 class="sectionTitle"><span class="grad">/home</span> e <span class="grad">/root</span></h2>
+        <div class="grid grid2" style="margin-top:22px">
+          <div class="card"><div class="icon">👥</div><h3>/home</h3><p>Diretórios pessoais dos usuários comuns. Cada conta costuma guardar documentos, preferências e arquivos ocultos em seu próprio subdiretório.</p><div class="terminal" style="margin-top:16px"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="out">/home/ana
+/home/bruno
+/home/aluno</span></pre></div></div>
+          <div class="card"><div class="icon">👑</div><h3>/root</h3><p>Diretório pessoal do superusuário. Fica fora de <code>/home</code> para continuar acessível em cenários de recuperação.</p><div class="callout warning" style="margin-top:16px;font-size:17px"><b>Atenção:</b> <code>/root</code> é uma pasta. O diretório <code>/</code> é a raiz da árvore.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/lib e /lib64">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">Bibliotecas essenciais</span>
+          <h2 class="sectionTitle"><span class="grad">/lib</span> e <span class="grad">/lib64</span></h2>
+          <p class="lead"><code>/lib</code> reúne bibliotecas compartilhadas necessárias aos programas essenciais e módulos do kernel. Diretórios como <code>/lib64</code> podem armazenar bibliotecas de formato alternativo em sistemas que precisam distinguir arquiteturas.</p>
+          <div class="callout warning" style="margin-top:22px"><b>Fusão de /usr:</b> esses caminhos também podem ser links simbólicos para diretórios sob <code>/usr</code>.</div>
+        </div>
+        <div class="terminal">
+          <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <pre><span class="prompt">aluno@linux:~$</span> <span class="cmd">ls</span> -ld /lib /lib64
+<span class="out">/lib -&gt; usr/lib
+/lib64 -&gt; usr/lib64</span>
+
+<span class="prompt">aluno@linux:~$</span> <span class="cmd">ls</span> /lib/modules/$(uname -r)
+<span class="out">kernel/  modules.alias  modules.dep ...</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/media e /mnt">
+      <div class="slideContent">
+        <span class="kicker">Pontos de montagem</span>
+        <h2 class="sectionTitle"><span class="grad">/media</span> e <span class="grad">/mnt</span></h2>
+        <div class="grid grid2" style="margin-top:22px">
+          <div class="card"><div class="icon">💾</div><h3>/media</h3><p>Ponto de montagem para mídias removíveis, como pendrives, cartões e discos externos. Ambientes gráficos costumam montar esses dispositivos automaticamente.</p><p class="mini" style="margin-top:12px">Exemplo: <code>/media/aluno/PENDRIVE</code></p></div>
+          <div class="card"><div class="icon">🔗</div><h3>/mnt</h3><p>Ponto reservado para montagens temporárias feitas pelo administrador, útil em manutenção, recuperação ou inspeção de outro sistema de arquivos.</p><p class="mini" style="margin-top:12px">Exemplo: <code>mount /dev/sdb1 /mnt</code></p></div>
+        </div>
+        <div class="callout" style="margin-top:24px"><b>Montar</b> significa ligar a raiz de outro sistema de arquivos a um diretório existente da árvore Linux.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/opt e /srv">
+      <div class="slideContent">
+        <span class="kicker">Aplicações adicionais e serviços</span>
+        <h2 class="sectionTitle"><span class="grad">/opt</span> e <span class="grad">/srv</span></h2>
+        <div class="grid grid2" style="margin-top:22px">
+          <div class="card"><div class="icon">📦</div><h3>/opt</h3><p>Pacotes de aplicações adicionais que mantêm seus arquivos agrupados. Um programa pode usar uma árvore como <code>/opt/fabricante/aplicacao</code>.</p></div>
+          <div class="card"><div class="icon">🌐</div><h3>/srv</h3><p>Dados específicos dos serviços oferecidos pelo sistema. Pode guardar conteúdo servido por HTTP, FTP ou outro serviço.</p></div>
+        </div>
+        <div class="terminal" style="margin-top:24px"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="out">/opt/acme/app/</span>        <span class="hl">arquivos do aplicativo adicional</span>
+<span class="out">/srv/www/portal/</span>      <span class="hl">conteúdo servido pelo host</span></pre></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/tmp e /var/tmp">
+      <div class="slideContent">
+        <span class="kicker">Arquivos temporários</span>
+        <h2 class="sectionTitle"><span class="grad">/tmp</span> e <span class="grad">/var/tmp</span> possuem expectativas diferentes</h2>
+        <div class="grid grid2" style="margin-top:20px">
+          <div class="card"><div class="icon">⚡</div><h3>/tmp</h3><p>Temporários de curta duração. Programas não devem contar com a permanência desses arquivos após uma reinicialização.</p><p class="mini" style="margin-top:12px">Permissão típica: <code>drwxrwxrwt</code>. O sticky bit impede que usuários removam arquivos alheios.</p></div>
+          <div class="card"><div class="icon">🕰️</div><h3>/var/tmp</h3><p>Temporários que precisam sobreviver por mais tempo. O FHS espera que não sejam apagados durante a inicialização normal.</p></div>
+        </div>
+        <div class="callout warning" style="margin-top:23px"><b>Segurança:</b> use ferramentas como <code>mktemp</code> para criar nomes imprevisíveis e permissões adequadas.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/usr">
+      <div class="slideContent">
+        <span class="kicker">Hierarquia secundária</span>
+        <h2 class="sectionTitle"><span class="grad">/usr</span>: programas e dados compartilháveis</h2>
+        <p class="lead"><code>/usr</code> não significa “pasta do usuário”. Ele concentra a maior parte dos comandos, bibliotecas e dados estáticos distribuídos pelo sistema.</p>
+        <div class="dirList">
+          <div class="dirItem"><b>/usr/bin</b><span>Maioria dos comandos para usuários</span></div>
+          <div class="dirItem"><b>/usr/sbin</b><span>Comandos administrativos não essenciais à recuperação</span></div>
+          <div class="dirItem"><b>/usr/lib</b><span>Bibliotecas de programas e pacotes</span></div>
+          <div class="dirItem"><b>/usr/share</b><span>Dados independentes de arquitetura, manuais e ícones</span></div>
+          <div class="dirItem"><b>/usr/include</b><span>Cabeçalhos usados no desenvolvimento em C</span></div>
+          <div class="dirItem"><b>/usr/src</b><span>Código-fonte, quando instalado</span></div>
+          <div class="dirItem"><b>/usr/libexec</b><span>Executáveis chamados por outros programas</span></div>
+          <div class="dirItem"><b>/usr/games</b><span>Jogos e programas educacionais opcionais</span></div>
+          <div class="dirItem"><b>/usr/local</b><span>Software instalado localmente pelo administrador</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/usr/local">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">Separação administrativa</span>
+          <h2 class="sectionTitle"><span class="grad">/usr/local</span></h2>
+          <p class="lead">O administrador usa essa hierarquia para instalar software local sem misturá-lo aos arquivos controlados pela distribuição.</p>
+          <div class="callout" style="margin-top:22px"><b>Vantagem:</b> uma atualização do sistema não deve sobrescrever os arquivos mantidos em <code>/usr/local</code>.</div>
+        </div>
+        <div class="terminal"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="out">/usr/local/bin</span>      comandos locais
+<span class="out">/usr/local/sbin</span>     administração local
+<span class="out">/usr/local/lib</span>      bibliotecas locais
+<span class="out">/usr/local/share</span>    dados independentes
+<span class="out">/usr/local/src</span>      código-fonte local</pre></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/var">
+      <div class="slideContent">
+        <span class="kicker">Dados que mudam durante o uso</span>
+        <h2 class="sectionTitle"><span class="grad">/var</span>: o histórico e o estado variável do sistema</h2>
+        <div class="dirList">
+          <div class="dirItem"><b>/var/log</b><span>Logs de serviços, kernel e aplicações</span></div>
+          <div class="dirItem"><b>/var/lib</b><span>Estado persistente de programas e serviços</span></div>
+          <div class="dirItem"><b>/var/cache</b><span>Dados recriáveis usados para acelerar aplicações</span></div>
+          <div class="dirItem"><b>/var/spool</b><span>Filas aguardando processamento, como impressão</span></div>
+          <div class="dirItem"><b>/var/mail</b><span>Caixas de correio dos usuários, quando usadas</span></div>
+          <div class="dirItem"><b>/var/lock</b><span>Arquivos de bloqueio, frequentemente ligados a /run/lock</span></div>
+          <div class="dirItem"><b>/var/tmp</b><span>Temporários preservados entre reinicializações</span></div>
+          <div class="dirItem"><b>/var/opt</b><span>Dados variáveis associados aos pacotes em /opt</span></div>
+          <div class="dirItem"><b>/var/crash</b><span>Registros de falhas, quando o mecanismo está instalado</span></div>
+        </div>
+        <div class="callout warning" style="margin-top:16px"><b>Operação:</b> crescimento inesperado de <code>/var/log</code>, <code>/var/lib</code> ou caches pode esgotar a partição.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="/proc e /sys">
+      <div class="slideContent">
+        <span class="kicker">Janelas para o kernel</span>
+        <h2 class="sectionTitle"><span class="grad">/proc</span> e <span class="grad">/sys</span> são sistemas de arquivos virtuais</h2>
+        <div class="grid grid2" style="margin-top:18px">
+          <div class="card"><div class="icon">🧠</div><h3>/proc</h3><p>Expõe processos e informações do kernel. Diretórios numéricos representam PIDs. Arquivos como <code>/proc/meminfo</code> e <code>/proc/cpuinfo</code> mostram o estado atual.</p></div>
+          <div class="card"><div class="icon">🧩</div><h3>/sys</h3><p>O sysfs apresenta dispositivos, drivers, barramentos e atributos do kernel em uma estrutura organizada.</p></div>
+        </div>
+        <div class="terminal" style="margin-top:20px"><div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">cat</span> /proc/meminfo | <span class="cmd">head</span>
+<span class="cmd">ls</span> /sys/class/net
+<span class="out">eth0  lo  wlan0</span></pre></div>
+        <div class="callout warning" style="margin-top:17px"><b>Cuidado:</b> algumas interfaces permitem alterar parâmetros do kernel e de dispositivos.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Variações atuais">
+      <div class="slideContent">
+        <span class="kicker">FHS e distribuições reais</span>
+        <h2 class="sectionTitle">A árvore pode conter links e diretórios adicionais</h2>
+        <div class="grid grid2" style="margin-top:16px">
+          <div class="card"><h3>Fusão de /usr</h3><p><code>/bin</code>, <code>/sbin</code> e <code>/lib</code> podem apontar para equivalentes em <code>/usr</code>. A finalidade lógica dos caminhos continua importante.</p></div>
+          <div class="card"><h3>/lost+found</h3><p>Sistemas de arquivos ext podem criar esse diretório para objetos recuperados durante uma verificação.</p></div>
+          <div class="card"><h3>/snap e semelhantes</h3><p>Formatos de empacotamento e distribuições podem adicionar diretórios próprios.</p></div>
+          <div class="card"><h3>/selinux, /data e outros</h3><p>Subsistemas, administradores e ambientes especializados podem acrescentar caminhos fora do conjunto principal.</p></div>
+        </div>
+        <div class="callout" style="margin-top:20px"><b>Regra de leitura:</b> confirme o tipo do caminho com <code>ls -ld</code>, <code>readlink -f</code> e <code>findmnt</code> antes de concluir como ele funciona.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Destino correto">
+      <div class="slideContent">
+        <span class="kicker">Decisão interativa</span>
+        <h2 class="sectionTitle">Em qual diretório você procuraria primeiro?</h2>
+        <p class="lead">Escolha uma situação. A explicação mostra o caminho esperado e o motivo.</p>
+        <div class="decision">
+          <button onclick="decision('log')"><code>Falha no SSH</code>Consultar mensagens do serviço</button>
+          <button onclick="decision('config')"><code>Configurar rede</code>Editar configuração específica do host</button>
+          <button onclick="decision('web')"><code>Portal servido pelo host</code>Armazenar conteúdo oferecido como serviço</button>
+          <button onclick="decision('local')"><code>Script administrativo próprio</code>Instalar sem conflito com o gerenciador de pacotes</button>
+        </div>
+        <div class="decisionFeedback" id="decisionFeedback">Selecione uma situação para revelar o raciocínio.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Investigação prática">
+      <div class="slideContent">
+        <span class="kicker">Laboratório guiado</span>
+        <h2 class="sectionTitle">Reconhecimento do FHS na sua distribuição</h2>
+        <div class="grid grid2" style="margin-top:14px">
+          <div class="card"><h3>1. Inspecione a raiz</h3><p><code>ls -ld /*</code><br>Separe diretórios reais, links simbólicos e pontos de montagem.</p></div>
+          <div class="card"><h3>2. Verifique a fusão de /usr</h3><p><code>readlink -f /bin /sbin /lib</code><br>Registre os destinos encontrados.</p></div>
+          <div class="card"><h3>3. Identifique sistemas virtuais</h3><p><code>findmnt /proc /sys /dev /run</code><br>Compare os tipos proc, sysfs, devtmpfs e tmpfs.</p></div>
+          <div class="card"><h3>4. Localize o consumo</h3><p><code>sudo du -sh /var/* 2&gt;/dev/null | sort -h</code><br>Descubra quais áreas variáveis ocupam mais espaço.</p></div>
+        </div>
+        <div class="callout" style="margin-top:18px"><b>Entrega rápida:</b> escolha cinco diretórios da raiz e escreva uma frase sobre a função e um exemplo real encontrado em cada um.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Quiz">
+      <div class="slideContent quizBox">
+        <span class="kicker">Desafio final</span>
+        <h2 class="sectionTitle">Quiz sobre o FHS</h2>
+        <p class="lead">As questões usam situações de administração. Leia a explicação antes de avançar.</p>
+        <div class="card" style="margin-top:14px">
+          <div id="quizArea"></div>
+          <div class="quizNav"><button onclick="prevQ()">← Anterior</button><button class="active" onclick="nextQ()" id="nextQBtn">Próxima →</button></div>
+          <div id="quizResult" style="display:none;text-align:center;padding:16px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Fechamento">
+      <div class="slideContent split">
+        <div>
+          <span class="kicker">Resumo da aula</span>
+          <h2 class="sectionTitle">O caminho informa a função do arquivo</h2>
+          <p class="lead">O FHS organiza a árvore para tornar sistemas previsíveis. Configurações ficam em <code>/etc</code>, dados variáveis em <code>/var</code>, programas distribuídos em <code>/usr</code> e interfaces do kernel aparecem em <code>/proc</code> e <code>/sys</code>.</p>
+          <div class="chips" style="margin-top:22px"><span class="pill">previsibilidade</span><span class="pill">recuperação</span><span class="pill">automação</span><span class="pill">segurança</span></div>
+          <div class="callout" style="margin-top:24px">Antes de alterar ou remover um arquivo, confirme por que ele está naquele caminho e qual serviço o utiliza.</div>
+        </div>
+        <div class="card" style="display:grid;place-items:center;text-align:center">
+          <div><div class="bigIcon">🗂️</div><h3 style="font-size:35px;margin:20px 0 8px">Agora explore o seu Linux</h3><p style="font-size:20px">A hierarquia deixa de parecer um labirinto quando cada diretório revela sua finalidade.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="nav" aria-label="Navegação dos slides">
+    <button id="prevBtn" onclick="prevSlide()">← Anterior</button>
+    <div class="dots" id="dots"></div>
+    <button id="nextBtn" class="primary" onclick="nextSlide()">Próximo →</button>
+  </nav>
+
+  <div class="modal" id="overview"><div class="modalBox"><div class="modalHeader"><h2>Visão geral da apresentação</h2><button class="close" onclick="closeModal('overview')">Fechar</button></div><div class="overviewGrid" id="overviewGrid"></div></div></div>
+  <div class="modal" id="sources"><div class="modalBox"><div class="modalHeader"><h2>Fontes da aula</h2><button class="close" onclick="closeModal('sources')">Fechar</button></div>
+    <div class="callout">Conteúdo fundamentado no Filesystem Hierarchy Standard 3.0 e na documentação atual do projeto Linux man-pages.</div>
+    <div class="grid grid2" style="margin-top:18px">
+      <div class="card"><h3>FHS 3.0</h3><p>Especificação oficial atualizada, requisitos da raiz e hierarquias <code>/usr</code> e <code>/var</code>.</p><a class="sourceLink" href="https://specifications.freedesktop.org/fhs/latest-single/" target="_blank" rel="noopener">specifications.freedesktop.org/fhs/latest-single/</a></div>
+      <div class="card"><h3>Linux man-pages</h3><p>Descrição prática da hierarquia Linux, incluindo <code>/proc</code> e <code>/sys</code>.</p><a class="sourceLink" href="https://man7.org/linux/man-pages/man7/hier.7.html" target="_blank" rel="noopener">man7.org/linux/man-pages/man7/hier.7.html</a></div>
+      <div class="card"><h3>Hierarquia /usr</h3><p>Finalidade, requisitos e subdiretórios padronizados.</p><a class="sourceLink" href="https://specifications.freedesktop.org/fhs/latest/usrHierarchy.html" target="_blank" rel="noopener">specifications.freedesktop.org/fhs/latest/usrHierarchy.html</a></div>
+      <div class="card"><h3>Hierarquia /var</h3><p>Dados variáveis, logs, estado, filas, caches e temporários persistentes.</p><a class="sourceLink" href="https://specifications.freedesktop.org/fhs/latest/varHierarchy.html" target="_blank" rel="noopener">specifications.freedesktop.org/fhs/latest/varHierarchy.html</a></div>
+    </div>
+  </div></div>
+  <div class="modal" id="help"><div class="modalBox"><div class="modalHeader"><h2>Ajuda de navegação</h2><button class="close" onclick="closeModal('help')">Fechar</button></div><div class="grid grid3">
+    <div class="card"><h3>Teclado</h3><p>Use ← e → para navegar. Home vai ao primeiro slide, End vai ao último e Esc fecha janelas.</p></div>
+    <div class="card"><h3>Botões</h3><p>Use a barra inferior. A visão geral permite saltar diretamente para qualquer conteúdo.</p></div>
+    <div class="card"><h3>Interações</h3><p>Clique nos diretórios, situações práticas e alternativas do quiz.</p></div>
+  </div></div></div>
+
+  <script>
+    const slides=[...document.querySelectorAll('.slide')];
+    const total=slides.length;
+    let current=0;
+    const progress=document.getElementById('progress');
+    const counter=document.getElementById('counter');
+    const prevBtn=document.getElementById('prevBtn');
+    const nextBtn=document.getElementById('nextBtn');
+    const dots=document.getElementById('dots');
+    slides.forEach((slide,index)=>{
+      const dot=document.createElement('span');
+      dot.className='sdot'+(index===0?' active':'');
+      dot.title=slide.dataset.title||('Slide '+(index+1));
+      dots.appendChild(dot);
+    });
+    const dotEls=[...document.querySelectorAll('.sdot')];
+    const overviewGrid=document.getElementById('overviewGrid');
+    slides.forEach((slide,index)=>{
+      const thumb=document.createElement('div');
+      thumb.className='thumb';
+      thumb.innerHTML='<b>'+String(index+1).padStart(2,'0')+'</b>'+(slide.dataset.title||('Slide '+(index+1)));
+      thumb.onclick=()=>{goTo(index);closeModal('overview')};
+      overviewGrid.appendChild(thumb);
+    });
+    function update(){
+      slides.forEach((slide,index)=>slide.classList.toggle('active',index===current));
+      dotEls.forEach((dot,index)=>dot.classList.toggle('active',index===current));
+      progress.style.width=((current+1)/total*100)+'%';
+      counter.textContent=(current+1)+' / '+total;
+      prevBtn.disabled=current===0;
+      nextBtn.textContent=current===total-1?'Fim':'Próximo →';
+    }
+    function goTo(index){current=Math.max(0,Math.min(total-1,index));update()}
+    function nextSlide(){if(current<total-1){current++;update()}}
+    function prevSlide(){if(current>0){current--;update()}}
+    function openModal(id){document.getElementById(id).classList.add('active')}
+    function closeModal(id){document.getElementById(id).classList.remove('active')}
+    function toggleFull(){if(!document.fullscreenElement){document.documentElement.requestFullscreen()}else{document.exitFullscreen()}}
+    document.addEventListener('keydown',event=>{
+      if(event.key==='ArrowRight'||event.key==='PageDown')nextSlide();
+      if(event.key==='ArrowLeft'||event.key==='PageUp')prevSlide();
+      if(event.key==='Home')goTo(0);
+      if(event.key==='End')goTo(total-1);
+      if(event.key==='Escape')['overview','sources','help'].forEach(closeModal);
+    });
+
+    const folderData={
+      '/bin':['Comandos essenciais','Executáveis necessários ao uso básico, boot e recuperação. Em sistemas com usrmerge, costuma apontar para /usr/bin.'],
+      '/boot':['Inicialização','Kernel, initramfs e arquivos do carregador de boot.'],
+      '/dev':['Dispositivos','Arquivos especiais que representam dispositivos e interfaces.'],
+      '/etc':['Configuração','Arquivos estáticos de configuração específicos do computador.'],
+      '/home':['Usuários','Diretórios pessoais de usuários comuns. É opcional no FHS.'],
+      '/lib':['Bibliotecas essenciais','Bibliotecas necessárias aos comandos essenciais e módulos do kernel.'],
+      '/media':['Mídias removíveis','Pontos de montagem para pendrives, cartões e discos removíveis.'],
+      '/mnt':['Montagem temporária','Ponto tradicional para montagens temporárias feitas pelo administrador.'],
+      '/opt':['Aplicações adicionais','Pacotes adicionais que mantêm seus arquivos agrupados.'],
+      '/proc':['Processos e kernel','Sistema virtual com informações de processos e parâmetros do kernel.'],
+      '/root':['Home do root','Diretório pessoal do superusuário. É diferente da raiz /.'],
+      '/run':['Estado desde o boot','PID files, sockets e dados da sessão atual de inicialização.'],
+      '/sbin':['Administração essencial','Comandos essenciais de recuperação e administração.'],
+      '/srv':['Dados de serviços','Conteúdo oferecido por serviços executados neste computador.'],
+      '/sys':['Dispositivos e drivers','Sistema virtual sysfs, estruturado a partir dos objetos do kernel.'],
+      '/tmp':['Temporários curtos','Arquivos temporários sem garantia de permanência após reiniciar.'],
+      '/usr':['Programas e dados estáticos','Maioria dos comandos, bibliotecas e dados compartilháveis do sistema.'],
+      '/var':['Dados variáveis','Logs, estado, caches, filas e outros dados que mudam durante o uso.']
+    };
+    const folderGrid=document.getElementById('folderGrid');
+    Object.keys(folderData).forEach((path,index)=>{
+      const button=document.createElement('button');
+      button.className='folderBtn';
+      button.textContent=path;
+      button.onclick=()=>showFolder(path,button);
+      folderGrid.appendChild(button);
+    });
+    function showFolder(path,button){
+      document.querySelectorAll('.folderBtn').forEach(item=>item.classList.remove('active'));
+      button.classList.add('active');
+      const data=folderData[path];
+      document.getElementById('folderInfo').innerHTML='<h3>'+path+'</h3><b>'+data[0]+':</b> '+data[1];
+    }
+    function decision(type){
+      const answers={
+        log:'<b>/var/log</b>: os registros variáveis de serviços ficam nessa área. Em sistemas com systemd, consulte também <code>journalctl -u ssh</code>.',
+        config:'<b>/etc</b>: configurações específicas do host pertencem a essa hierarquia. O arquivo exato depende da distribuição e do gerenciador de rede.',
+        web:'<b>/srv</b>: o FHS reserva essa área para dados servidos pelo sistema. Distribuições também podem configurar raízes web em outros caminhos.',
+        local:'<b>/usr/local/sbin</b>: um script administrativo instalado localmente fica separado dos arquivos controlados pela distribuição.'
+      };
+      document.getElementById('decisionFeedback').innerHTML=answers[type];
+    }
+
+    const questions=[
+      {
+        q:'Um servidor não consegue iniciar o SSH depois de uma alteração. Onde você deve procurar primeiro a configuração persistente do serviço?',
+        options:['/run/ssh','/etc/ssh','/usr/share/ssh','/var/cache/ssh'],
+        answer:1,
+        explain:'Configurações específicas do host ficam em /etc. O estado temporário da execução pode aparecer em /run, mas não substitui a configuração persistente.'
+      },
+      {
+        q:'Qual opção separa corretamente /tmp de /var/tmp?',
+        options:['Somente root pode usar /var/tmp','/tmp guarda binários e /var/tmp guarda bibliotecas','/var/tmp oferece maior expectativa de permanência entre reinicializações','/tmp sempre fica em disco e /var/tmp sempre fica na memória'],
+        answer:2,
+        explain:'O FHS espera que /var/tmp preserve arquivos durante reinicializações normais. Programas não devem contar com a permanência de /tmp.'
+      },
+      {
+        q:'Em uma distribuição com usrmerge, o comando ls -ld /bin mostra que /bin aponta para /usr/bin. Qual conclusão está correta?',
+        options:['O sistema deixou de seguir qualquer organização FHS','/bin perdeu sua finalidade lógica','O caminho de compatibilidade permanece, mas o conteúdo físico foi unificado em /usr/bin','Todos os comandos administrativos agora ficam em /etc'],
+        answer:2,
+        explain:'A fusão de /usr usa links simbólicos para unificar o armazenamento. Os caminhos tradicionais continuam disponíveis para compatibilidade.'
+      },
+      {
+        q:'Um aplicativo precisa manter um banco de estado que muda durante sua execução e deve sobreviver ao reboot. Qual destino combina melhor com o FHS?',
+        options:['/var/lib/aplicativo','/run/aplicativo','/usr/share/aplicativo','/tmp/aplicativo'],
+        answer:0,
+        explain:'/var/lib guarda informações de estado variável e persistente. /run e /tmp possuem natureza temporária.'
+      },
+      {
+        q:'Por que /proc e /sys não devem ser tratados como diretórios comuns em disco?',
+        options:['Porque contêm apenas links quebrados','Porque são interfaces virtuais mantidas pelo kernel','Porque pertencem ao diretório pessoal do root','Porque só existem durante a instalação'],
+        answer:1,
+        explain:'procfs e sysfs expõem informações do kernel, processos e dispositivos. O conteúdo reflete o estado atual do sistema.'
+      },
+      {
+        q:'Você compilou uma ferramenta administrativa local e quer evitar conflito com o gerenciador de pacotes. Onde instalá-la?',
+        options:['/usr/local/sbin','/sbin/local','/etc/bin','/var/programs'],
+        answer:0,
+        explain:'/usr/local existe para software instalado pelo administrador. A subpasta sbin é apropriada para ferramentas administrativas locais.'
+      },
+      {
+        q:'Um pendrive foi montado automaticamente para uma sessão gráfica. Qual caminho é mais provável?',
+        options:['/boot/usb','/media/usuario/rotulo','/srv/usb','/proc/usb'],
+        answer:1,
+        explain:'/media é o ponto previsto para mídias removíveis. Ambientes gráficos costumam criar subdiretórios por usuário e rótulo.'
+      },
+      {
+        q:'Qual diretório pode crescer rapidamente por causa de logs, caches e estado de serviços?',
+        options:['/var','/bin','/boot','/lib'],
+        answer:0,
+        explain:'/var reúne dados que mudam durante o uso. Monitorar seu espaço evita falhas causadas por partição cheia.'
+      },
+      {
+        q:'Qual afirmação descreve melhor /usr?',
+        options:['É o diretório pessoal de todos os usuários','Guarda apenas arquivos temporários','Concentra programas e dados estáticos que podem ser compartilháveis','Existe somente em servidores'],
+        answer:2,
+        explain:'/usr contém a maior parte dos comandos, bibliotecas e dados estáticos. Diretórios pessoais ficam normalmente em /home.'
+      },
+      {
+        q:'Você precisa montar manualmente uma partição apenas para recuperar arquivos. Qual ponto segue o uso tradicional do FHS?',
+        options:['/mnt','/etc','/run','/sbin'],
+        answer:0,
+        explain:'/mnt serve como ponto para montagens temporárias feitas pelo administrador, incluindo tarefas de recuperação.'
+      }
+    ];
+    let qIndex=0;
+    let answers=Array(questions.length).fill(null);
+    function renderQ(){
+      const question=questions[qIndex];
+      const selected=answers[qIndex];
+      let html='<div class="mini" style="font-weight:900;color:#a5f3fc">Pergunta '+(qIndex+1)+' de '+questions.length+'</div>';
+      html+='<h3 style="font-size:26px;margin:10px 0 14px">'+question.q+'</h3>';
+      question.options.forEach((option,index)=>{
+        let cls='option';
+        if(selected!==null){
+          if(index===question.answer)cls+=' correct';
+          else if(index===selected)cls+=' wrong';
+        }
+        html+='<button class="'+cls+'" onclick="choose('+index+')">'+String.fromCharCode(65+index)+'. '+option+'</button>';
+      });
+      html+='<div class="quizExplain" style="display:'+(selected===null?'none':'block')+'"><b>Explicação:</b> '+question.explain+'</div>';
+      document.getElementById('quizArea').innerHTML=html;
+      document.getElementById('nextQBtn').textContent=qIndex===questions.length-1?'Ver resultado':'Próxima →';
+      document.getElementById('quizResult').style.display='none';
+    }
+    function choose(index){if(answers[qIndex]===null){answers[qIndex]=index;renderQ()}}
+    function nextQ(){if(qIndex<questions.length-1){qIndex++;renderQ()}else{showResult()}}
+    function prevQ(){if(qIndex>0){qIndex--;renderQ()}}
+    function showResult(){
+      const score=answers.reduce((sum,value,index)=>sum+(value===questions[index].answer?1:0),0);
+      const msg=score>=9?'Excelente. Você relacionou a hierarquia a situações reais de administração.':score>=7?'Bom resultado. Revise os diretórios das questões incorretas.':'Retome o mapa da raiz e refaça a prática antes de tentar novamente.';
+      document.getElementById('quizResult').style.display='block';
+      document.getElementById('quizResult').innerHTML='<div class="resultBadge grad">'+score+'/'+questions.length+'</div><p class="lead" style="margin:9px auto">'+msg+'</p><button class="restart" onclick="restartQuiz()">Refazer quiz</button>';
+    }
+    function restartQuiz(){answers=Array(questions.length).fill(null);qIndex=0;renderQ()}
+    renderQ();
+    update();
+  </script>
+</body>
+</html>
