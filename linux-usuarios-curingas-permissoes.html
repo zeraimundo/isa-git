@@ -198,6 +198,6 @@ function renderQ(){const q=questions[qi],sel=answers[qi];let h='<div class="mini
 function choose(i){if(answers[qi]===null){answers[qi]=i;renderQ()}}function nextQ(){if(qi<questions.length-1){qi++;renderQ()}else{const sc=answers.reduce(function(s,v,i){return s+(v===questions[i].a)},0);document.getElementById('score').innerHTML='<div class="card good" style="margin-top:11px"><strong style="font-size:27px">'+sc+'/'+questions.length+'</strong> — '+(sc>=8?'Ótimo domínio dos três modelos mentais.':'Revise as explicações e tente novamente.')+'</div>'}}function prevQ(){if(qi>0){qi--;renderQ()}}
 renderCalc();renderQ();update();
 </script>
-<script src="command-help.v1.js?v=20261017" defer></script>
+<script src="command-help.v1.js?v=20261017.2" defer></script>
 </body>
 </html>
