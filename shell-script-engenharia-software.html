@@ -212,6 +212,14 @@ case "$opcao" in
   *) echo "Opção inválida"; exit 1 ;;
 esac</pre><table class="table"><tr><th>Comando</th><th>Explicação</th></tr><tr><td><code>sudo ./pacotes.sh</code></td><td>Executa o script com privilégios administrativos.</td></tr><tr><td><code>apt update</code></td><td>Atualiza a lista de pacotes disponíveis. Não atualiza os programas instalados.</td></tr><tr><td><code>apt install</code></td><td>Instala o pacote e suas dependências.</td></tr><tr><td><code>apt remove</code></td><td>Remove o programa, mas pode preservar arquivos de configuração.</td></tr></table></section>
 
+<section class="slide"><div class="k">Estrutura case</div><h2>Como o menu escolhe uma ação</h2><pre>#!/bin/bash
+
+case "$opcao" in
+  1) echo "Instalar" ;;
+  2) echo "Remover" ;;
+  *) echo "Opção inválida" ;;
+esac</pre><table class="table"><tr><th>Forma</th><th>Explicação</th></tr><tr><td><code>case "$opcao" in</code></td><td>Inicia a comparação do valor guardado em <code>opcao</code>. A palavra <code>in</code> apresenta os padrões possíveis.</td></tr><tr><td><code>1)</code> e <code>2)</code></td><td>São padrões. O comando da linha executa quando o valor corresponde ao número.</td></tr><tr><td><code>*)</code></td><td>O asterisco representa qualquer outro valor. Funciona como a opção padrão.</td></tr><tr><td><code>;;</code></td><td>Dois pontos e vírgulas encerram os comandos daquele padrão.</td></tr><tr><td><code>esac</code></td><td>Fecha a estrutura. É a palavra <code>case</code> escrita ao contrário.</td></tr></table></section>
+
 <section class="slide"><div class="k">Opções do apt</div><h2>Use opções somente quando compreender o efeito</h2><table class="table"><tr><th>Forma</th><th>O que faz</th></tr><tr><td><code>apt install -y pacote</code></td><td><span class="opt">y</span> de yes. Responde “sim” automaticamente. Evite durante a aprendizagem, pois remove a confirmação.</td></tr><tr><td><code>apt purge pacote</code></td><td>Remove o pacote e seus arquivos de configuração administrados pelo pacote.</td></tr><tr><td><code>apt autoremove</code></td><td>Remove dependências instaladas automaticamente que não são mais necessárias.</td></tr><tr><td><code>apt list --installed</code></td><td><span class="opt">--installed</span> é uma opção longa. Mostra apenas pacotes instalados.</td></tr><tr><td><code>apt show pacote</code></td><td>Mostra descrição, versão, dependências e outras informações.</td></tr></table><p class="call">O script anterior não usa <code>-y</code>. Assim, a turma ainda vê e confirma o que o APT pretende fazer.</p></section>
 
 <section class="slide"><div class="k">Funções</div><h2>Evitar repetir o mesmo bloco</h2><pre>#!/bin/bash
