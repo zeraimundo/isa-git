@@ -1,205 +1,266 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Shell Script para Engenharia de Software — ISA</title>
+<title>Shell Script no Debian 13 — ISA</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#071018;--p:#102431;--ink:#eef8ff;--muted:#9eb3c0;--c:#52e3ff;--g:#45e59a;--a:#ffc857}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 8%,#19354d,transparent 35%),var(--bg);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.top{position:fixed;z-index:10;inset:0 0 auto;height:58px;background:#071018e9;border-bottom:1px solid #294354;display:flex;align-items:center;padding:0 24px}.brand{font-weight:800;letter-spacing:.08em}.brand b,h3,.accent{color:var(--c)}nav{margin-left:auto;display:flex;gap:8px}button,.btn{border:1px solid #355367;background:#0d1b26;color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:700}.progress{position:fixed;z-index:12;top:57px;height:3px;background:linear-gradient(90deg,var(--c),var(--g))}.slide{display:none;height:100vh;padding:88px max(5vw,48px) 54px;overflow:auto}.slide.active{display:flex;flex-direction:column;justify-content:center;animation:in .3s}@keyframes in{from{opacity:0;transform:translateY(10px)}}.k{font:600 13px "Fira Code";text-transform:uppercase;letter-spacing:.15em;color:var(--g);margin-bottom:10px}h1{font-size:clamp(38px,6vw,78px);line-height:1.02;margin:0 0 18px}h2{font-size:clamp(30px,4vw,54px);line-height:1.08;margin:0 0 22px}h3{margin:0 0 8px}p,li{font-size:clamp(16px,1.4vw,21px);line-height:1.5}.lead{font-size:clamp(20px,2vw,28px);max-width:980px;color:#c8dae5}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:linear-gradient(145deg,var(--p),#0b1822);border:1px solid #294457;border-radius:15px;padding:19px}.card strong{color:var(--g)}code,pre{font-family:"Fira Code",monospace}code{color:#d9fbff}pre{position:relative;background:#050b10;border:1px solid #274052;border-left:4px solid var(--g);border-radius:11px;padding:17px;overflow:auto;font-size:clamp(13px,1.15vw,17px);line-height:1.5;white-space:pre}.copy{position:absolute;right:7px;top:7px;padding:4px 7px}.call{border-left:4px solid var(--a);background:#291f0f;padding:14px 17px;border-radius:9px}.lab{border:1px solid #31664d;background:#0b281d;border-radius:14px;padding:17px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{font:600 13px "Fira Code";border:1px solid #315064;border-radius:999px;padding:7px 10px}.table{width:100%;border-collapse:collapse;font-size:clamp(14px,1.1vw,18px)}.table th,.table td{padding:10px;border-bottom:1px solid #294252;text-align:left}.table th{color:var(--c)}.footer{position:fixed;z-index:11;bottom:0;left:0;right:0;height:42px;padding:0 22px;display:flex;align-items:center;background:#071018e9;color:#88a0af;font:13px "Fira Code"}.footer span:last-child{margin-left:auto}.arr{position:fixed;z-index:12;top:50%;transform:translateY(-50%);width:42px;height:54px;font-size:24px}.prev{left:8px}.next{right:8px}.modal{display:none;position:fixed;z-index:30;inset:0;background:#02070be8;padding:6vh 8vw}.modal.open{display:block}.box{max-width:1050px;max-height:88vh;overflow:auto;margin:auto;background:#0d1b26;border:1px solid #355367;border-radius:16px;padding:24px}.head{display:flex;justify-content:space-between}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.overview button{text-align:left}.interactive{display:grid;grid-template-columns:1fr 1fr;gap:15px}.interactive textarea{width:100%;background:#050b10;color:#dff;border:1px solid #355367;border-radius:9px;padding:11px;font:14px "Fira Code"}.result{min-height:140px;background:#050b10;border-radius:9px;padding:12px;white-space:pre-wrap;font:14px "Fira Code";color:#bafbd6}@media(max-width:850px){.grid,.g3,.interactive{grid-template-columns:1fr}.slide{padding:82px 42px 52px}.overview{grid-template-columns:1fr 1fr}nav button:not(:last-child){display:none}}
+:root{--bg:#071018;--p:#102431;--ink:#eef8ff;--muted:#9eb3c0;--c:#52e3ff;--g:#45e59a;--a:#ffc857;--r:#ff7886}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 85% 8%,#19354d,transparent 35%),var(--bg);color:var(--ink);font-family:Inter,sans-serif;overflow:hidden}.top{position:fixed;z-index:10;inset:0 0 auto;height:58px;background:#071018eb;border-bottom:1px solid #294354;display:flex;align-items:center;padding:0 24px}.brand{font-weight:800;letter-spacing:.08em}.brand b,h3,.accent{color:var(--c)}nav{margin-left:auto;display:flex;gap:8px}button{border:1px solid #355367;background:#0d1b26;color:var(--ink);border-radius:9px;padding:8px 12px;cursor:pointer;font-weight:700}.progress{position:fixed;z-index:12;top:57px;height:3px;background:linear-gradient(90deg,var(--c),var(--g))}.slide{display:none;height:100vh;padding:84px max(5vw,48px) 52px;overflow:auto}.slide.active{display:flex;flex-direction:column;justify-content:center;animation:in .3s}@keyframes in{from{opacity:0;transform:translateY(9px)}}.k{font:600 13px "Fira Code";text-transform:uppercase;letter-spacing:.14em;color:var(--g);margin-bottom:9px}h1{font-size:clamp(38px,6vw,76px);line-height:1.02;margin:0 0 18px}h2{font-size:clamp(29px,3.8vw,52px);line-height:1.08;margin:0 0 20px}h3{margin:0 0 8px}p,li{font-size:clamp(15px,1.3vw,20px);line-height:1.47}.lead{font-size:clamp(20px,2vw,27px);max-width:980px;color:#c8dae5}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:linear-gradient(145deg,var(--p),#0b1822);border:1px solid #294457;border-radius:14px;padding:17px;min-width:0}.card strong{color:var(--g)}code,pre{font-family:"Fira Code",monospace}code{color:#d9fbff}pre{position:relative;background:#050b10;border:1px solid #274052;border-left:4px solid var(--g);border-radius:11px;padding:16px;overflow:auto;font-size:clamp(12px,1.04vw,16px);line-height:1.48;white-space:pre}.copy{position:absolute;right:7px;top:7px;padding:4px 7px;font-size:11px}.call{border-left:4px solid var(--a);background:#291f0f;padding:13px 16px;border-radius:9px}.lab{border:1px solid #31664d;background:#0b281d;border-radius:13px;padding:15px}.warn{border-color:#775027;background:#2b1d0d}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{font:600 13px "Fira Code";border:1px solid #315064;border-radius:999px;padding:7px 10px}.table{width:100%;border-collapse:collapse;font-size:clamp(13px,1.02vw,17px)}.table th,.table td{padding:8px 10px;border-bottom:1px solid #294252;text-align:left;vertical-align:top}.table th{color:var(--c)}.opt{font-family:"Fira Code";color:var(--a);font-weight:700}.footer{position:fixed;z-index:11;bottom:0;left:0;right:0;height:40px;padding:0 22px;display:flex;align-items:center;background:#071018eb;color:#88a0af;font:12px "Fira Code"}.footer span:last-child{margin-left:auto}.arr{position:fixed;z-index:12;top:50%;transform:translateY(-50%);width:40px;height:52px;font-size:23px}.prev{left:7px}.next{right:7px}.modal{display:none;position:fixed;z-index:30;inset:0;background:#02070be8;padding:6vh 8vw}.modal.open{display:block}.box{max-width:1060px;max-height:88vh;overflow:auto;margin:auto;background:#0d1b26;border:1px solid #355367;border-radius:16px;padding:23px}.head{display:flex;justify-content:space-between}.overview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.overview button{text-align:left}.demo{display:grid;grid-template-columns:1fr 1fr;gap:14px}.demo input{width:100%;background:#050b10;color:#dff;border:1px solid #355367;border-radius:8px;padding:10px;font:14px "Fira Code"}.result{min-height:100px;background:#050b10;border-radius:8px;padding:11px;white-space:pre-wrap;font:14px "Fira Code";color:#bafbd6}.small{font-size:13px;color:var(--muted)}@media(max-width:850px){.grid,.g3,.demo{grid-template-columns:1fr}.slide{padding:80px 42px 50px}.overview{grid-template-columns:1fr 1fr}nav button:not(:last-child){display:none}}
 </style></head><body>
-<header class="top"><div class="brand"><b>ISA</b> / SHELL SCRIPT</div><nav><button data-open="overview">Visão geral</button><button data-open="refs">Referências</button><button id="full">Tela cheia</button></nav></header><div class="progress"></div><button class="arr prev">‹</button><button class="arr next">›</button><main>
+<header class="top"><div class="brand"><b>ISA</b> / SHELL SCRIPT / DEBIAN 13</div><nav><button data-open="overview">Visão geral</button><button data-open="refs">Referências</button><button id="full">Tela cheia</button></nav></header>
+<div class="progress"></div><button class="arr prev">‹</button><button class="arr next">›</button><main>
 
-<section class="slide active"><div class="k">Introdução a Sistemas Abertos • Aula interativa</div><h1>Shell Script para<br><span class="accent">Engenharia de Software</span></h1><p class="lead">Do primeiro comando à automação confiável: variáveis, decisões, laços, funções, pipelines, regex, sed, awk e release.</p><div class="chips"><span class="chip">Bash</span><span class="chip">Automação</span><span class="chip">DevOps</span><span class="chip">Observabilidade</span><span class="chip">Segurança</span></div></section>
+<section class="slide active"><div class="k">Introdução a Sistemas Abertos</div><h1>Shell Script no<br><span class="accent">Debian 13</span></h1><p class="lead">Automação das atividades já praticadas: diretórios, arquivos, permissões, usuários, FHS, filtros e pacotes.</p><div class="chips"><span class="chip">explicação passo a passo</span><span class="chip">opções traduzidas</span><span class="chip">exemplos para o laboratório</span></div></section>
 
-<section class="slide"><div class="k">Roteiro</div><h2>Conceito → demonstração → prática</h2><div class="grid g3"><div class="card"><h3>Fundamentos</h3><p>Execução, variáveis, argumentos, status e redirecionamentos.</p></div><div class="card"><h3>Controle</h3><p>if, case, for, while, funções e arrays.</p></div><div class="card"><h3>Produção</h3><p>Falhas seguras, logs, texto e release.</p></div></div><p class="call">Bash é a “cola” de build, CI/CD, containers, backups e diagnóstico. Para sistemas grandes e estruturas complexas, use uma linguagem de propósito geral.</p></section>
+<section class="slide"><div class="k">Objetivo da aula</div><h2>Reunir comandos conhecidos em scripts</h2><div class="grid g3"><div class="card"><h3>Antes</h3><p>O estudante digita cada comando manualmente e precisa lembrar a ordem.</p></div><div class="card"><h3>Com o script</h3><p>O arquivo registra a ordem, recebe dados e repete a tarefa quando necessário.</p></div><div class="card"><h3>Resultado</h3><p>A mesma atividade pode ser testada, corrigida e executada novamente.</p></div></div><p class="call">Nesta aula não usaremos sed nem awk. O foco permanece nos comandos já estudados pela turma.</p></section>
 
-<section class="slide"><div class="k">Anatomia e execução</div><h2>Texto + interpretador + permissão</h2><div class="grid"><pre>#!/usr/bin/env bash
+<section class="slide"><div class="k">Primeiro script</div><h2>O interpretador <code>#!/bin/bash</code></h2><div class="grid"><pre>#!/bin/bash
 
-projeto="api-pedidos"
-printf 'Verificando %s...\n' "$projeto"</pre><div class="card"><p><code>#!</code> define o interpretador. <code>env</code> procura o Bash no PATH. Aspas protegem espaços e curingas.</p><pre>bash ola.sh
-chmod +x ola.sh
-./ola.sh</pre></div></div><div class="lab"><h3>Em sala</h3><p>Crie <code>ola.sh</code>, altere o projeto e compare as três formas de execução. Por que <code>./</code> é necessário?</p></div></section>
+echo "Olá, turma de ISA!"
+echo "O script começou."</pre><div class="card"><table class="table"><tr><th>Parte</th><th>Significado</th></tr><tr><td><code>#!</code></td><td>Shebang. Informa qual programa interpretará o arquivo.</td></tr><tr><td><code>/bin/bash</code></td><td>Caminho do Bash no Debian 13.</td></tr><tr><td><code>echo</code></td><td>Exibe texto ou o valor de uma variável.</td></tr></table><p><strong>Regra da aula:</strong> todos os scripts começarão exatamente com <code>#!/bin/bash</code>.</p></div></div></section>
 
-<section class="slide"><div class="k">Contrato entre programas</div><h2>Códigos de saída: sucesso é zero</h2><div class="grid"><pre>mkdir -p build
-cp app.jar build/
-status=$?
+<section class="slide"><div class="k">Criar e executar</div><h2>Do editor ao terminal</h2><pre>nano primeiro.sh
+chmod +x primeiro.sh
+./primeiro.sh</pre><table class="table"><tr><th>Comando ou símbolo</th><th>Explicação</th></tr><tr><td><code>nano primeiro.sh</code></td><td>Abre ou cria o arquivo no editor Nano.</td></tr><tr><td><code>chmod</code></td><td>Change mode. Altera permissões.</td></tr><tr><td><span class="opt">+x</span></td><td><span class="opt">+</span> adiciona uma permissão. <span class="opt">x</span> significa execução.</td></tr><tr><td><code>./</code></td><td>Indica que o arquivo está no diretório atual.</td></tr></table><div class="lab"><h3>Teste</h3><p>Remova a permissão com <code>chmod -x primeiro.sh</code>. O sinal <code>-</code> retira a permissão. Depois, adicione-a novamente.</p></div></section>
 
-if (( status == 0 )); then
-  echo "artefato preparado"
+<section class="slide"><div class="k">Comentários e ordem</div><h2>O Bash lê de cima para baixo</h2><pre>#!/bin/bash
+
+# Esta linha é um comentário.
+echo "1. Criando o diretório"
+mkdir aula_shell
+
+echo "2. Entrando no diretório"
+cd aula_shell
+
+echo "3. Criando o arquivo"
+touch anotacoes.txt</pre><table class="table"><tr><th>Elemento</th><th>Função</th></tr><tr><td><code># texto</code></td><td>Comentário. O Bash ignora essa linha. A primeira linha é a exceção por conter o shebang.</td></tr><tr><td><code>mkdir</code></td><td>Make directory. Cria um diretório.</td></tr><tr><td><code>cd</code></td><td>Change directory. Muda o diretório atual.</td></tr><tr><td><code>touch</code></td><td>Cria um arquivo vazio ou atualiza sua data.</td></tr></table></section>
+
+<section class="slide"><div class="k">Variáveis</div><h2>Guardar um valor para reutilizar</h2><pre>#!/bin/bash
+
+pasta="atividade_isa"
+arquivo="resultado.txt"
+
+mkdir "$pasta"
+touch "$pasta/$arquivo"
+echo "Arquivo criado em: $pasta/$arquivo"</pre><table class="table"><tr><th>Forma</th><th>Explicação</th></tr><tr><td><code>pasta="valor"</code></td><td>Cria a variável. Não coloque espaços antes ou depois de <code>=</code>.</td></tr><tr><td><code>$pasta</code></td><td>O cifrão pede ao Bash o valor guardado.</td></tr><tr><td><code>"$pasta"</code></td><td>As aspas mantêm o valor como um único argumento, mesmo com espaços.</td></tr></table></section>
+
+<section class="slide"><div class="k">Entrada pelo teclado</div><h2><code>read</code> permite conversar com o script</h2><pre>#!/bin/bash
+
+read -r -p "Digite seu nome: " nome
+echo "Olá, $nome!"</pre><table class="table"><tr><th>Parte</th><th>Significado</th></tr><tr><td><code>read</code></td><td>Lê o que o usuário digitar.</td></tr><tr><td><span class="opt">-r</span></td><td>A letra <span class="opt">r</span> vem de raw. Mantém barras invertidas como texto.</td></tr><tr><td><span class="opt">-p</span></td><td>A letra <span class="opt">p</span> vem de prompt. Mostra uma mensagem antes da leitura.</td></tr><tr><td><code>nome</code></td><td>Variável que recebe o texto digitado.</td></tr></table><div class="lab"><h3>Altere</h3><p>Peça também a matrícula e mostre os dois valores em uma frase.</p></div></section>
+
+<section class="slide"><div class="k">Argumentos</div><h2>Dados informados na execução</h2><pre>#!/bin/bash
+
+echo "Nome do script: $0"
+echo "Primeiro argumento: $1"
+echo "Segundo argumento: $2"
+echo "Quantidade: $#"
+echo "Todos: $@"</pre><pre>./argumentos.sh aluno atividade_01</pre><table class="table"><tr><th>Variável automática</th><th>Valor neste exemplo</th></tr><tr><td><code>$0</code></td><td><code>./argumentos.sh</code></td></tr><tr><td><code>$1</code> e <code>$2</code></td><td><code>aluno</code> e <code>atividade_01</code></td></tr><tr><td><code>$#</code></td><td>2. O símbolo <code>#</code> representa a quantidade.</td></tr><tr><td><code>"$@"</code></td><td>Todos os argumentos, mantendo cada um separado.</td></tr></table></section>
+
+<section class="slide"><div class="k">Valores padrão</div><h2>O script pode funcionar sem argumento</h2><pre>#!/bin/bash
+
+pasta=&#36;{1:-atividade_isa}
+echo "A pasta será: $pasta"
+mkdir -p "$pasta"</pre><table class="table"><tr><th>Forma</th><th>Explicação</th></tr><tr><td><code>&#36;{1:-atividade_isa}</code></td><td>Usa <code>$1</code>. Se estiver vazio, usa <code>atividade_isa</code>.</td></tr><tr><td><code>:-</code></td><td>Operador de valor padrão.</td></tr><tr><td><span class="opt">mkdir -p</span></td><td><span class="opt">p</span> vem de parents. Cria diretórios intermediários e não reclama se a pasta já existir.</td></tr></table></section>
+
+<section class="slide"><div class="k">Testes</div><h2>Verificar antes de continuar</h2><pre>#!/bin/bash
+
+pasta=&#36;{1:-atividade_isa}
+
+if [[ -d "$pasta" ]]; then
+  echo "O diretório existe."
 else
-  echo "falha na cópia" >&2
+  echo "O diretório não existe."
+fi</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>if</code></td><td>Inicia a decisão: “se a condição for verdadeira”.</td></tr><tr><td><code>[[ ... ]]</code></td><td>Área em que o Bash avalia a condição.</td></tr><tr><td><span class="opt">-d</span></td><td>A letra <span class="opt">d</span> significa directory. Testa se o caminho é um diretório.</td></tr><tr><td><code>then</code></td><td>Inicia os comandos do resultado verdadeiro.</td></tr><tr><td><code>else</code></td><td>Inicia a alternativa falsa.</td></tr><tr><td><code>fi</code></td><td>Fecha o bloco <code>if</code>.</td></tr></table></section>
+
+<section class="slide"><div class="k">Testes de arquivos</div><h2>As letras mais úteis em <code>[[ ]]</code></h2><table class="table"><tr><th>Teste</th><th>Pergunta feita pelo Bash</th></tr><tr><td><span class="opt">-e caminho</span></td><td><span class="opt">e</span> de exists: o caminho existe?</td></tr><tr><td><span class="opt">-f arquivo</span></td><td><span class="opt">f</span> de file: é um arquivo comum?</td></tr><tr><td><span class="opt">-d pasta</span></td><td><span class="opt">d</span> de directory: é um diretório?</td></tr><tr><td><span class="opt">-r arquivo</span></td><td><span class="opt">r</span> de read: há permissão de leitura?</td></tr><tr><td><span class="opt">-w arquivo</span></td><td><span class="opt">w</span> de write: há permissão de escrita?</td></tr><tr><td><span class="opt">-x arquivo</span></td><td><span class="opt">x</span> de execute: há permissão de execução?</td></tr><tr><td><span class="opt">-z "$texto"</span></td><td><span class="opt">z</span> de zero: a string está vazia?</td></tr></table><p class="call">O hífen faz parte da opção. Ele indica que a letra modifica o teste ou o comando.</p></section>
+
+<section class="slide"><div class="k">Status e encadeamento</div><h2>O resultado do comando</h2><pre>#!/bin/bash
+
+mkdir -p atividade
+echo "Código retornado: $?"
+
+cd atividade && touch ok.txt
+cd pasta_inexistente || echo "Não foi possível entrar."</pre><table class="table"><tr><th>Símbolo</th><th>Explicação</th></tr><tr><td><code>$?</code></td><td>Código do comando anterior. Zero significa sucesso. Outro número indica erro.</td></tr><tr><td><code>&amp;&amp;</code></td><td>Executa o próximo comando somente se o anterior funcionar.</td></tr><tr><td><code>||</code></td><td>Executa o próximo comando somente se o anterior falhar.</td></tr></table></section>
+
+<section class="slide"><div class="k">Repetição com for</div><h2>Criar vários arquivos</h2><pre>#!/bin/bash
+
+for numero in 1 2 3
+do
+  touch "relatorio$numero.txt"
+  echo "Criado: relatorio$numero.txt"
+done</pre><table class="table"><tr><th>Palavra</th><th>Explicação</th></tr><tr><td><code>for</code></td><td>Inicia a repetição.</td></tr><tr><td><code>numero</code></td><td>Recebe um valor por vez: 1, depois 2, depois 3.</td></tr><tr><td><code>in</code></td><td>Apresenta a lista que será percorrida.</td></tr><tr><td><code>do</code></td><td>Inicia os comandos repetidos.</td></tr><tr><td><code>done</code></td><td>Encerra o laço.</td></tr></table></section>
+
+<section class="slide"><div class="k">Curingas em scripts</div><h2>Selecionar grupos de arquivos</h2><pre>#!/bin/bash
+
+mkdir -p backup
+cp *.txt backup/
+ls -l backup/</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>*.txt</code></td><td><code>*</code> representa qualquer quantidade de caracteres. Seleciona todos os nomes terminados em <code>.txt</code>.</td></tr><tr><td><code>arq?.txt</code></td><td><code>?</code> representa exatamente um caractere.</td></tr><tr><td><code>cp</code></td><td>Copy. Copia os arquivos para o último argumento.</td></tr><tr><td><span class="opt">ls -l</span></td><td><span class="opt">l</span> de long. Exibe formato detalhado, incluindo permissões, dono, grupo e tamanho.</td></tr></table><p class="call">Se nenhum arquivo combinar com o curinga, o comando pode falhar. Por isso o script deve verificar os arquivos quando a operação for importante.</p></section>
+
+<section class="slide"><div class="k">Automação 1</div><h2>Preparar a estrutura de uma atividade</h2><pre>#!/bin/bash
+
+base=&#36;{1:-atividade_isa}
+
+mkdir -p "$base/documentos"
+mkdir -p "$base/backup"
+mkdir -p "$base/relatorios"
+
+for numero in 1 2 3
+do
+  touch "$base/documentos/relatorio$numero.txt"
+  touch "$base/documentos/sistema$numero.log"
+done
+
+cp "$base"/documentos/*.txt "$base/backup/"
+cp "$base"/documentos/*.log "$base/relatorios/"
+ls -R "$base"</pre><table class="table"><tr><th>Opção</th><th>Explicação</th></tr><tr><td><span class="opt">mkdir -p</span></td><td><span class="opt">p</span> cria os diretórios necessários e aceita uma pasta já existente.</td></tr><tr><td><span class="opt">ls -R</span></td><td><span class="opt">R</span> maiúsculo significa recursive. Lista a pasta e suas subpastas.</td></tr></table></section>
+
+<section class="slide"><div class="k">Automação 2</div><h2>Aplicar as permissões da atividade</h2><pre>#!/bin/bash
+
+pasta=&#36;{1:-atividade_isa/documentos}
+
+if [[ ! -d "$pasta" ]]; then
+  echo "Diretório não encontrado: $pasta"
+  exit 1
 fi
-exit "$status"</pre><div class="card"><h3><code>$?</code></h3><p>Guarda o status do último comando: <strong>0</strong> é sucesso; outro valor é falha.</p><p>CI, Docker e systemd usam esse contrato para decidir o próximo passo.</p><p>Teste: execute <code>false; echo $?</code> e <code>true; echo $?</code>.</p></div></div></section>
 
-<section class="slide"><div class="k">Variáveis e aspas</div><h2>Aspas são uma ferramenta de segurança</h2><table class="table"><tr><th>Forma</th><th>Efeito</th></tr><tr><td><code>"$nome"</code></td><td>expande sem separar palavras</td></tr><tr><td><code>'$nome'</code></td><td>texto literal</td></tr><tr><td><code>&#36;{nome}</code></td><td>delimita a variável: <code>"&#36;{nome}.log"</code></td></tr></table><pre>arquivo="relatório final.txt"
-touch "$arquivo"       # um arquivo
-# touch $arquivo      # dois argumentos: perigo!</pre></section>
+chmod 600 "$pasta/relatorio1.txt"
+chmod 640 "$pasta/relatorio2.txt"
+chmod 644 "$pasta/relatorio3.txt"
+chmod 400 "$pasta/sistema1.log"
+chmod 440 "$pasta/sistema2.log"
+chmod 444 "$pasta/sistema3.log"
 
-<section class="slide"><div class="k">Parâmetros automáticos</div><h2>Uma ferramenta de linha de comando</h2><div class="grid"><pre>#!/usr/bin/env bash
-arquivo=&#36;{1:-app.log}
-nivel=&#36;{2:-ERROR}
+ls -l "$pasta"</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>!</code></td><td>Nega a condição. <code>! -d</code> significa “não é diretório”.</td></tr><tr><td><code>exit 1</code></td><td>Encerra o script informando erro.</td></tr><tr><td><code>chmod 640</code></td><td>Dono: 6 = leitura 4 + escrita 2. Grupo: 4 = leitura. Outros: 0 = nenhuma.</td></tr></table></section>
 
-printf 'Script: %s\n' "$0"
-printf 'Argumentos: %s\n' "$#"
-grep "$nivel" "$arquivo"</pre><div class="card"><ul><li><code>$0</code>: script</li><li><code>$1…$9</code>: argumentos</li><li><code>$#</code>: quantidade</li><li><code>"$@"</code>: todos preservados</li><li><code>$$</code>: PID</li></ul><p>Experimente: <code>./filtra.sh servidor.log WARN</code>.</p></div></div></section>
+<section class="slide"><div class="k">Permissões simbólicas</div><h2>Letras usadas pelo chmod</h2><table class="table"><tr><th>Letra ou sinal</th><th>Significado</th></tr><tr><td><code>u</code></td><td>user: dono do arquivo</td></tr><tr><td><code>g</code></td><td>group: grupo do arquivo</td></tr><tr><td><code>o</code></td><td>others: demais usuários</td></tr><tr><td><code>a</code></td><td>all: todos</td></tr><tr><td><code>r / w / x</code></td><td>read, write e execute</td></tr><tr><td><code>+ / - / =</code></td><td>adiciona, retira ou define exatamente</td></tr></table><pre>#!/bin/bash
 
-<section class="slide"><div class="k">Entrada, validação e aritmética</div><h2>Valide antes de agir</h2><div class="grid"><pre>read -r -p "Ambiente [dev]: " ambiente
-ambiente=&#36;{ambiente:-dev}
+arquivo=&#36;{1:-relatorio.txt}
+chmod u=rw,g=r,o= "$arquivo"
+chmod g+w "$arquivo"
+chmod o-rwx "$arquivo"
+ls -l "$arquivo"</pre></section>
 
-if [[ ! "$ambiente" =~ ^(dev|homolog|prod)$ ]]; then
-  echo "Ambiente inválido" >&2
-  exit 2
-fi</pre><pre>tentativas=3
-falhas=1
-restantes=$((tentativas - falhas))
-((falhas++))
+<section class="slide"><div class="k">Automação 3</div><h2>Consultar um usuário com segurança</h2><pre>#!/bin/bash
 
-if (( restantes > 0 )); then
-  echo "tentar novamente"
-fi</pre></div><p class="call">Nunca concatene entrada não validada em comandos. Bash calcula inteiros; para decimais, componha com awk.</p></section>
+read -r -p "Usuário a consultar: " usuario
 
-<section class="slide"><div class="k">Redirecionamentos</div><h2>Dados e diagnóstico em canais separados</h2><table class="table"><tr><th>Sintaxe</th><th>Uso</th></tr><tr><td><code>&gt;</code> / <code>&gt;&gt;</code></td><td>sobrescreve / acrescenta stdout</td></tr><tr><td><code>2&gt; erro.log</code></td><td>redireciona stderr</td></tr><tr><td><code>&gt; tudo.log 2&gt;&amp;1</code></td><td>reúne stdout e stderr</td></tr><tr><td><code>&lt; arquivo</code></td><td>arquivo como entrada</td></tr></table><pre>./testes.sh >resultado.log 2>falhas.log</pre></section>
-
-<section class="slide"><div class="k">Pipelines</div><h2>Programas pequenos, composição poderosa</h2><pre>grep 'ERROR' app.log |
-  cut -d' ' -f1 |
-  sort |
-  uniq -c |
-  sort -nr</pre><div class="grid"><div class="card"><h3>Leitura</h3><p>Filtra erros, extrai a data, agrupa e ordena pelas mais frequentes.</p></div><div class="card"><h3>Falha escondida</h3><p>Use <code>set -o pipefail</code>. <code>&#36;{PIPESTATUS[*]}</code> mostra o status de cada etapa.</p></div></div></section>
-
-<section class="slide"><div class="k">Condições e case</div><h2>Regras do sistema em código legível</h2><div class="grid"><pre>if [[ -f "$config" && -r "$config" ]]; then
-  echo "configuração pronta"
-elif [[ -e "$config" ]]; then
-  echo "não legível" >&2
+if id "$usuario" > /dev/null 2>&1
+then
+  echo "O usuário existe."
+  id "$usuario"
+  getent passwd "$usuario"
 else
-  echo "ausente" >&2
-fi</pre><pre>case "&#36;{1:-help}" in
- start) docker compose up -d ;;
- stop)  docker compose down ;;
- logs)  docker compose logs -f ;;
- help)  echo "uso: $0 AÇÃO" ;;
- *) echo "ação inválida" >&2; exit 2 ;;
-esac</pre></div><div class="lab"><h3>Em duplas</h3><p>Acrescentem a ação <code>status</code> e uma mensagem de ajuda com exemplos.</p></div></section>
+  echo "Usuário não encontrado."
+  exit 1
+fi</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>id usuário</code></td><td>Mostra UID, GID e grupos. Também retorna erro se a conta não existir.</td></tr><tr><td><code>&gt; /dev/null</code></td><td>Descarta a saída normal.</td></tr><tr><td><code>2&gt;&amp;1</code></td><td>Envia o canal 2, erros, para o mesmo destino do canal 1, saída normal.</td></tr><tr><td><code>getent passwd</code></td><td>Consulta a base de contas usada pelo sistema.</td></tr></table></section>
 
-<section class="slide"><div class="k">Laços</div><h2><code>for</code> percorre; <code>while</code> reage</h2><div class="grid"><pre>falhou=0
-for arquivo in configs/*.json; do
-  jq empty "$arquivo" || {
-    echo "inválido: $arquivo"
-    falhou=1
-  }
-done
-exit "$falhou"</pre><pre>tentativa=1
-while (( tentativa <= 5 )); do
-  curl -fsS localhost:8080/health \
-    && break
-  sleep "$tentativa"
-  ((tentativa++))
-done</pre></div><p class="call">Aplicações reais: validar configurações antes do deploy e repetir health checks com espera progressiva.</p></section>
+<section class="slide"><div class="k">Administração de usuários</div><h2>Criar e remover exige root</h2><pre>#!/bin/bash
 
-<section class="slide"><div class="k">Funções</div><h2>Separe responsabilidades</h2><pre>log() { printf '[%(%H:%M:%S)T] %s\n' -1 "$*"; }
+usuario=&#36;{1:-aluno}
 
-exigir() {
-  command -v "$1" >/dev/null 2>&1 || {
-    log "dependência ausente: $1"
-    return 1
-  }
+if [[ $EUID -ne 0 ]]; then
+  echo "Execute como root."
+  exit 1
+fi
+
+adduser "$usuario"</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>$EUID</code></td><td>Effective User ID. No root, o valor é 0.</td></tr><tr><td><span class="opt">-ne</span></td><td>Not equal. Testa se dois números são diferentes.</td></tr><tr><td><code>adduser</code></td><td>Ferramenta amigável do Debian para criar conta, home e senha.</td></tr></table><div class="lab warn"><h3>Cuidado</h3><p>Para remover: <code>deluser aluno</code> preserva a home. <code>deluser --remove-home aluno</code> remove também a pasta pessoal. A opção longa diz exatamente o que será apagado.</p></div></section>
+
+<section class="slide"><div class="k">Automação 4</div><h2>Verificar diretórios do FHS</h2><pre>#!/bin/bash
+
+diretorios=("/etc" "/home" "/var" "/tmp" "/usr" "/proc")
+
+for pasta in "&#36;{diretorios[@]}"
+do
+  if [[ -d "$pasta" ]]; then
+    echo "[OK] $pasta existe"
+  else
+    echo "[ERRO] $pasta não existe"
+  fi
+done</pre><table class="table"><tr><th>Forma</th><th>Explicação</th></tr><tr><td><code>diretorios=(...)</code></td><td>Cria um array, uma lista de valores.</td></tr><tr><td><code>"&#36;{diretorios[@]}"</code></td><td>Percorre todos os elementos preservando cada caminho separadamente.</td></tr><tr><td><code>[OK]</code></td><td>É apenas texto para facilitar a leitura do relatório.</td></tr></table></section>
+
+<section class="slide"><div class="k">Automação 5</div><h2>Relatório simples com filtros</h2><pre>#!/bin/bash
+
+arquivo=&#36;{1:-/var/log/dpkg.log}
+termo=&#36;{2:-install}
+
+if [[ ! -r "$arquivo" ]]; then
+  echo "Não posso ler: $arquivo"
+  exit 1
+fi
+
+grep -i -n "$termo" "$arquivo" > resultado.txt
+quantidade=$(wc -l < resultado.txt)
+
+echo "Linhas encontradas: $quantidade"
+echo "Relatório: resultado.txt"</pre><table class="table"><tr><th>Opção ou forma</th><th>Explicação</th></tr><tr><td><span class="opt">grep -i</span></td><td><span class="opt">i</span> de ignore case. Ignora maiúsculas e minúsculas.</td></tr><tr><td><span class="opt">grep -n</span></td><td><span class="opt">n</span> de number. Mostra o número de cada linha.</td></tr><tr><td><span class="opt">wc -l</span></td><td><span class="opt">l</span> de lines. Conta linhas.</td></tr><tr><td><code>$(comando)</code></td><td>Executa o comando e guarda sua saída.</td></tr><tr><td><code>&lt; resultado.txt</code></td><td>Usa o arquivo como entrada do <code>wc</code>.</td></tr></table></section>
+
+<section class="slide"><div class="k">Automação 6</div><h2>Menu para pacotes no Debian 13</h2><pre>#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+  echo "Use: sudo ./pacotes.sh"
+  exit 1
+fi
+
+read -r -p "Pacote: " pacote
+echo "1 - Instalar"
+echo "2 - Remover"
+read -r -p "Opção: " opcao
+
+case "$opcao" in
+  1) apt update && apt install "$pacote" ;;
+  2) apt remove "$pacote" ;;
+  *) echo "Opção inválida"; exit 1 ;;
+esac</pre><table class="table"><tr><th>Comando</th><th>Explicação</th></tr><tr><td><code>sudo ./pacotes.sh</code></td><td>Executa o script com privilégios administrativos.</td></tr><tr><td><code>apt update</code></td><td>Atualiza a lista de pacotes disponíveis. Não atualiza os programas instalados.</td></tr><tr><td><code>apt install</code></td><td>Instala o pacote e suas dependências.</td></tr><tr><td><code>apt remove</code></td><td>Remove o programa, mas pode preservar arquivos de configuração.</td></tr></table></section>
+
+<section class="slide"><div class="k">Opções do apt</div><h2>Use opções somente quando compreender o efeito</h2><table class="table"><tr><th>Forma</th><th>O que faz</th></tr><tr><td><code>apt install -y pacote</code></td><td><span class="opt">y</span> de yes. Responde “sim” automaticamente. Evite durante a aprendizagem, pois remove a confirmação.</td></tr><tr><td><code>apt purge pacote</code></td><td>Remove o pacote e seus arquivos de configuração administrados pelo pacote.</td></tr><tr><td><code>apt autoremove</code></td><td>Remove dependências instaladas automaticamente que não são mais necessárias.</td></tr><tr><td><code>apt list --installed</code></td><td><span class="opt">--installed</span> é uma opção longa. Mostra apenas pacotes instalados.</td></tr><tr><td><code>apt show pacote</code></td><td>Mostra descrição, versão, dependências e outras informações.</td></tr></table><p class="call">O script anterior não usa <code>-y</code>. Assim, a turma ainda vê e confirma o que o APT pretende fazer.</p></section>
+
+<section class="slide"><div class="k">Funções</div><h2>Evitar repetir o mesmo bloco</h2><pre>#!/bin/bash
+
+verificar_diretorio() {
+  if [[ -d "$1" ]]; then
+    echo "[OK] $1"
+  else
+    echo "[ERRO] $1"
+  fi
 }
 
-main() {
-  exigir git
-  exigir shellcheck
-  log "ambiente aprovado"
-}
-main "$@"</pre><p><code>local</code> evita vazamento. <code>return</code> comunica status; saída textual não substitui esse contrato.</p></section>
+verificar_diretorio "/etc"
+verificar_diretorio "/home"
+verificar_diretorio "/var"</pre><table class="table"><tr><th>Parte</th><th>Explicação</th></tr><tr><td><code>nome() { ... }</code></td><td>Define uma função.</td></tr><tr><td><code>$1</code> dentro da função</td><td>Primeiro argumento recebido pela função.</td></tr><tr><td><code>}</code></td><td>Fecha a função.</td></tr><tr><td><code>verificar_diretorio "/etc"</code></td><td>Chama a função e envia um argumento.</td></tr></table></section>
 
-<section class="slide"><div class="k">Arrays</div><h2>Preserve cada argumento exatamente</h2><div class="grid"><pre>servicos=(api worker frontend)
+<section class="slide"><div class="k">Projeto de sala</div><h2>Assistente da atividade avaliativa</h2><div class="grid g3"><div class="card"><h3>Opção 1</h3><p>Criar a árvore <code>documentos</code>, <code>backup</code> e <code>relatorios</code>.</p></div><div class="card"><h3>Opção 2</h3><p>Criar arquivos, copiar por extensão e listar com <code>ls -R</code>.</p></div><div class="card"><h3>Opção 3</h3><p>Aplicar as permissões e conferir com <code>ls -l</code>.</p></div></div><pre>#!/bin/bash
 
-for servico in "&#36;{servicos[@]}"; do
-  printf 'Testando %s\n' "$servico"
-  "./test-$servico.sh"
-done</pre><div class="card"><p>Uma string com espaços não é uma lista segura. Arrays mantêm cada elemento separado.</p><pre>comando=(curl -fsS --max-time 5)
-"&#36;{comando[@]}" "$url"
+echo "1 - Preparar diretórios e arquivos"
+echo "2 - Aplicar permissões"
+echo "3 - Conferir resultado"
+read -r -p "Escolha: " opcao
 
-echo "&#36;{#servicos[@]} serviços"</pre></div></div></section>
+case "$opcao" in
+  1) ./preparar.sh ;;
+  2) ./permissoes.sh ;;
+  3) ls -R atividade_isa; ls -l atividade_isa/documentos ;;
+  *) echo "Opção inválida"; exit 1 ;;
+esac</pre><p class="small"><code>;</code> separa dois comandos na mesma linha. Para facilitar a leitura, eles também poderiam ficar em linhas diferentes.</p></section>
 
-<section class="slide"><div class="k">Falhas seguras</div><h2>Temporários, trap e modo estrito</h2><pre>#!/usr/bin/env bash
-set -Eeuo pipefail
+<section class="slide"><div class="k">Atividade guiada</div><h2>Automação de uma tarefa já conhecida</h2><div class="lab"><ol><li>Crie <code>assistente_isa.sh</code> com <code>#!/bin/bash</code>.</li><li>Receba o nome da pasta por <code>$1</code>, usando <code>atividade_isa</code> como padrão.</li><li>Crie três subpastas com <code>mkdir -p</code>.</li><li>Use <code>for</code> para criar três arquivos <code>.txt</code> e três <code>.log</code>.</li><li>Copie cada extensão para a pasta correta.</li><li>Aplique permissões diferentes com <code>chmod</code>.</li><li>Mostre o resultado com <code>ls -R</code> e <code>ls -l</code>.</li><li>Se a pasta já existir, peça confirmação antes de continuar.</li></ol></div><p>Entrega: script, captura da execução e explicação de cinco opções ou símbolos utilizados.</p></section>
 
-tmp=$(mktemp -d)
-cleanup() { rm -rf -- "$tmp"; }
-trap cleanup EXIT
-trap 'echo "falha na linha $LINENO" >&2' ERR
+<section class="slide"><div class="k">Erros comuns</div><h2>Como ler a mensagem e corrigir</h2><table class="table"><tr><th>Erro</th><th>Causa provável</th><th>Correção</th></tr><tr><td>Permission denied</td><td>Falta permissão de execução</td><td><code>chmod +x script.sh</code></td></tr><tr><td>No such file or directory</td><td>Caminho ou nome incorreto</td><td>Use <code>pwd</code> e <code>ls -l</code></td></tr><tr><td>command not found</td><td>Comando digitado errado ou pacote ausente</td><td>Confira o nome e use <code>apt show</code></td></tr><tr><td>syntax error near...</td><td>Bloco incompleto ou símbolo fora do lugar</td><td>Confira <code>fi</code>, <code>done</code>, <code>esac</code> e aspas</td></tr></table><pre>bash -n script.sh</pre><p><span class="opt">-n</span> significa no execution. O Bash verifica a sintaxe sem executar os comandos.</p></section>
 
-cp config/*.json "$tmp/"
-tar -czf backup.tgz -C "$tmp" .</pre><div class="grid g3"><div class="card"><h3>-e</h3><p>interrompe falhas não tratadas</p></div><div class="card"><h3>-u</h3><p>rejeita variável indefinida</p></div><div class="card"><h3>pipefail</h3><p>propaga falha do pipeline</p></div></div></section>
+<section class="slide"><div class="k">Checklist</div><h2>Antes de executar</h2><div class="grid"><div class="card"><ul><li>Primeira linha: <code>#!/bin/bash</code></li><li>Variáveis entre aspas: <code>"$pasta"</code></li><li>Caminhos e nomes conferidos</li><li>Condições fechadas com <code>fi</code></li><li>Laços fechados com <code>done</code></li></ul></div><div class="card"><ul><li>Teste de sintaxe: <code>bash -n</code></li><li>Permissão: <code>chmod +x</code></li><li>Execução sem root primeiro</li><li><code>sudo</code> apenas quando necessário</li><li>Saída conferida com <code>ls</code> e <code>echo</code></li></ul></div></div></section>
 
-<section class="slide"><div class="k">Regex interativa</div><h2>Reconheça padrões em logs</h2><div class="interactive"><div><textarea id="input" rows="8">2026-11-15 INFO serviço iniciado
-2026-11-15 ERROR banco indisponível
-2026-11-15 WARN latência alta
-2026-11-15 ERROR timeout na API</textarea><p><button id="filter">Filtrar ERROR</button></p></div><div class="result" id="result">Clique em “Filtrar ERROR”.</div></div><pre>grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2} ERROR' app.log</pre></section>
+<section class="slide"><div class="k">Referências e agradecimento</div><h2>Professor Thiago Gouveia</h2><div class="grid"><div class="card"><h3>Conteúdo-base</h3><p>Playlist <strong>Mini Curso Scripts BASH</strong>, do canal do professor Thiago Gouveia.</p><p><a class="accent" href="https://www.youtube.com/playlist?list=PLlfnoloSCPI2yAhYzUXE6V8-8DNC5nk0M" target="_blank">Abrir a playlist no YouTube</a></p></div><div class="card"><h3>Consulta complementar</h3><ul><li><a class="accent" href="https://www.gnu.org/software/bash/manual/" target="_blank">GNU Bash Reference Manual</a></li><li><a class="accent" href="https://www.debian.org/doc/manuals/debian-reference/" target="_blank">Debian Reference</a></li><li><a class="accent" href="https://manpages.debian.org/" target="_blank">Debian Manpages</a></li></ul></div></div><p>Exemplos adaptados para o Debian 13 e para as atividades da disciplina de Introdução a Sistemas Abertos.</p></section>
 
-<section class="slide"><div class="k">sed e awk</div><h2>Transforme configuração e extraia métricas</h2><div class="grid"><pre># visualize antes de editar
-sed 's/localhost/db.internal/g' app.conf
-
-# edição com backup
-sed -i.bak \
- 's/^DEBUG=true/DEBUG=false/' .env</pre><pre>awk -F, '
- NR > 1 {
-   total += $3; cont++
-   if ($2 >= 500) erros++
- }
- END {
-   printf "média %.1f ms | erros %d\n",
-     total/cont, erros
- }
-' metricas.csv</pre></div></section>
-
-<section class="slide"><div class="k">Projeto integrador</div><h2>Release com guard rails</h2><div class="grid g3"><div class="card"><h3>Entrada</h3><p>projeto e tag semântica</p></div><div class="card"><h3>Validação</h3><p>dependências, Git limpo, versão</p></div><div class="card"><h3>Saída</h3><p>artefato, checksum, status</p></div></div><pre>./release.sh ./api-pedidos v1.4.0
-# dist/api-pedidos-v1.4.0.tar.gz
-# dist/api-pedidos-v1.4.0.tar.gz.sha256</pre></section>
-
-<section class="slide"><div class="k">Projeto integrador</div><h2>Implementação verificável</h2><pre>#!/usr/bin/env bash
-set -Eeuo pipefail
-projeto=&#36;{1:?uso: $0 DIRETORIO TAG}
-tag=&#36;{2:?informe a tag, exemplo: v1.2.0}
-
-[[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
-  { echo "tag inválida" >&2; exit 2; }
-[[ -d "$projeto/.git" ]] ||
-  { echo "não é repositório" >&2; exit 3; }
-
-for cmd in git tar sha256sum; do
-  command -v "$cmd" >/dev/null ||
-    { echo "falta: $cmd" >&2; exit 4; }
-done
-git -C "$projeto" diff --quiet ||
-  { echo "há alterações locais" >&2; exit 5; }
-
-mkdir -p dist
-nome=$(basename "$projeto")
-artefato="dist/&#36;{nome}-&#36;{tag}.tar.gz"
-tar --exclude=.git -czf "$artefato" \
-  -C "$(dirname "$projeto")" "$nome"
-sha256sum "$artefato" > "&#36;{artefato}.sha256"
-printf 'Release criada: %s\n' "$artefato"</pre></section>
-
-<section class="slide"><div class="k">Atividade guiada</div><h2>Observabilidade de uma API</h2><div class="lab"><h3>Desafio em equipes — 35 minutos</h3><ol><li>Crie 12 linhas com data, nível, endpoint e latência.</li><li>Receba o arquivo por <code>$1</code> e valide sua existência.</li><li>Conte INFO, WARN e ERROR.</li><li>Com awk, calcule a média por endpoint.</li><li>Gere <code>relatorio-TIMESTAMP.txt</code>; erros vão para stderr.</li><li>Retorne 1 se houver ERROR; caso contrário, 0.</li></ol></div><p>Uma equipe cria o log, outra o analisador e outra os testes. Depois, trocam os arquivos.</p></section>
-
-<section class="slide"><div class="k">Práticas profissionais</div><h2>Checklist antes de versionar</h2><div class="grid"><div class="card"><ul><li>variáveis entre aspas;</li><li>printf e stderr;</li><li>status significativo;</li><li>mktemp e trap;</li><li>alvos destrutivos validados.</li></ul></div><div class="card"><ul><li><code>shellcheck script.sh</code>;</li><li><code>bash -n script.sh</code>;</li><li>funções pequenas e <code>main "$@"</code>;</li><li>README com exemplos;</li><li>código versionado e revisado.</li></ul></div></div></section>
-
-<section class="slide"><div class="k">Encerramento</div><h2>Automação boa é um contrato confiável</h2><p class="lead">Recebe entradas claras, valida hipóteses, compõe ferramentas, falha de forma visível e deixa evidências para manutenção.</p><div class="chips"><span class="chip">entrada validada</span><span class="chip">saída previsível</span><span class="chip">falha explícita</span><span class="chip">código versionado</span></div></section>
-
-<section class="slide"><div class="k">Referências e agradecimento</div><h2>Professor Thiago Gouveia</h2><div class="grid"><div class="card"><h3>Conteúdo-base</h3><p>Playlist <strong>Mini Curso Scripts BASH</strong>, do canal do professor Thiago Gouveia.</p><p><a class="accent" href="https://www.youtube.com/playlist?list=PLlfnoloSCPI2yAhYzUXE6V8-8DNC5nk0M" target="_blank">Abrir a playlist no YouTube ↗</a></p><p>Conceitos, variáveis automáticas, aritmética, redirecionamentos, condicionais, laços, funções, regex, sed, awk, arrays e PIPESTATUS.</p></div><div class="card"><h3>Para continuar</h3><ul><li><a class="accent" href="https://www.gnu.org/software/bash/manual/" target="_blank">GNU Bash Reference</a></li><li><a class="accent" href="https://www.shellcheck.net/" target="_blank">ShellCheck</a></li><li><a class="accent" href="https://www.gnu.org/software/gawk/manual/" target="_blank">GNU awk Manual</a></li><li><a class="accent" href="https://www.gnu.org/software/sed/manual/" target="_blank">GNU sed Manual</a></li></ul></div></div></section>
-</main>
-<div class="footer"><span>← → navegar • Espaço avançar • O visão geral</span><span id="counter"></span></div>
+</main><div class="footer"><span>← → navegar • Espaço avançar • O visão geral</span><span id="counter"></span></div>
 <div class="modal" id="overview"><div class="box"><div class="head"><h3>Visão geral</h3><button class="close">Fechar</button></div><div class="overview" id="overviewGrid"></div></div></div>
-<div class="modal" id="refs"><div class="box"><div class="head"><h3>Referências</h3><button class="close">Fechar</button></div><p>Conteúdo-base: “Mini Curso Scripts BASH”, canal do professor Thiago Gouveia.</p><p><a class="accent" href="https://www.youtube.com/playlist?list=PLlfnoloSCPI2yAhYzUXE6V8-8DNC5nk0M" target="_blank">Playlist completa</a></p><p>Complementos: GNU Bash, GNU sed, GNU awk e ShellCheck.</p></div></div>
+<div class="modal" id="refs"><div class="box"><div class="head"><h3>Referências</h3><button class="close">Fechar</button></div><p>Playlist “Mini Curso Scripts BASH”, canal do professor Thiago Gouveia.</p><p><a class="accent" href="https://www.youtube.com/playlist?list=PLlfnoloSCPI2yAhYzUXE6V8-8DNC5nk0M" target="_blank">Playlist completa</a></p><p>Complementos: GNU Bash Manual, Debian Reference e Debian Manpages.</p></div></div>
 <script>
 const slides=[...document.querySelectorAll('.slide')];let cur=0;const counter=document.querySelector('#counter'),bar=document.querySelector('.progress');
 function show(n){cur=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===cur));counter.textContent=String(cur+1).padStart(2,'0')+' / '+slides.length;bar.style.width=((cur+1)/slides.length*100)+'%';history.replaceState(null,'','#'+(cur+1))}
 document.querySelector('.next').onclick=()=>show(cur+1);document.querySelector('.prev').onclick=()=>show(cur-1);
 document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1)}if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(cur-1)}if(e.key.toLowerCase()==='o')open('overview');if(e.key==='Escape')document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'))});
-document.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.textContent='copiar';b.onclick=async()=>{await navigator.clipboard.writeText(pre.innerText.replace(/^copiar/,'').trim());b.textContent='copiado!';setTimeout(()=>b.textContent='copiar',1000)};pre.appendChild(b)});
+document.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.textContent='copiar';b.onclick=async()=>{await navigator.clipboard.writeText(pre.innerText.replace(/^copiar/,'').trim());b.textContent='copiado';setTimeout(()=>b.textContent='copiar',1000)};pre.appendChild(b)});
 function open(id){document.querySelector('#'+id).classList.add('open')}document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>open(b.dataset.open));document.querySelectorAll('.close').forEach(b=>b.onclick=()=>b.closest('.modal').classList.remove('open'));
 const grid=document.querySelector('#overviewGrid');slides.forEach((s,i)=>{const b=document.createElement('button');b.textContent=String(i+1).padStart(2,'0')+' — '+(s.querySelector('h1,h2')?.textContent||'Slide');b.onclick=()=>{show(i);document.querySelector('#overview').classList.remove('open')};grid.appendChild(b)});
 document.querySelector('#full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
-document.querySelector('#filter').onclick=()=>{const r=document.querySelector('#input').value.split('\n').filter(l=>/^\d{4}-\d{2}-\d{2} ERROR/.test(l));document.querySelector('#result').textContent=r.length?r.join('\n'):'Nenhuma linha encontrada.'};
 const h=parseInt(location.hash.slice(1));show(Number.isFinite(h)?h-1:0);
 </script><script src="command-help.v1.js"></script></body></html>
