@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Find e Locate no Debian 13 — ISA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:rgba(15, 23, 42, .82);
+      --panel2:rgba(2, 6, 23, .82);
+      --text:#e5f0ff;
+      --muted:#9fb3c8;
+      --accent:#38bdf8;
+      --accent2:#22c55e;
+      --warn:#f59e0b;
+      --danger:#ef4444;
+      --purple:#a78bfa;
+      --line:rgba(148,163,184,.25);
+      --shadow:0 24px 80px rgba(0,0,0,.42);
+      --radius:24px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; overflow:hidden; font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif; color:var(--text); background:var(--bg);}
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(56,189,248,.25), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(34,197,94,.18), transparent 22%),
+        radial-gradient(circle at 55% 80%, rgba(167,139,250,.22), transparent 28%),
+        linear-gradient(120deg, #020617 0%, #07111f 48%, #0f172a 100%);
+      z-index:-3;
+    }
+    body:after{
+      content:"";
+      position:fixed; inset:-100px;
+      background-image:
+        linear-gradient(rgba(56,189,248,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,.06) 1px, transparent 1px);
+      background-size:46px 46px;
+      transform:rotate(-2deg);
+      animation:gridMove 18s linear infinite;
+      z-index:-2;
+    }
+    @keyframes gridMove{from{background-position:0 0} to{background-position:230px 230px}}
+
+    .particles{position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.55;}
+    .particle{position:absolute; width:4px; height:4px; background:var(--accent); border-radius:50%; box-shadow:0 0 18px var(--accent); animation:float linear infinite;}
+    @keyframes float{
+      0%{transform:translateY(105vh) scale(.6); opacity:0}
+      12%{opacity:.8}
+      90%{opacity:.6}
+      100%{transform:translateY(-10vh) scale(1.2); opacity:0}
+    }
+
+    .deck{height:100vh; width:100vw; position:relative;}
+    .slide{
+      position:absolute; inset:0; display:none; padding:72px 78px 96px;
+      animation:slideIn .45s ease both;
+    }
+    .slide.active{display:flex; flex-direction:column;}
+    @keyframes slideIn{from{opacity:0; transform:translateX(28px) scale(.992)} to{opacity:1; transform:translateX(0) scale(1)}}
+
+    .kicker{font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-size:15px; margin-bottom:10px;}
+    h1{font-size:64px; line-height:1.02; margin:0 0 18px; letter-spacing:-.04em;}
+    h2{font-size:46px; line-height:1.08; margin:0 0 22px; letter-spacing:-.03em;}
+    h3{font-size:28px; margin:0 0 14px;}
+    p,li{font-size:22px; line-height:1.45; color:var(--muted);}
+    strong{color:var(--text)}
+    .accent{color:var(--accent)}
+    .green{color:var(--accent2)}
+    .warn{color:var(--warn)}
+    .danger{color:var(--danger)}
+    .purple{color:var(--purple)}
+
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:26px; align-items:stretch;}
+    .row-3{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
+    .wide{max-width:1180px}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px;
+      backdrop-filter:blur(16px);
+    }
+    .glass{
+      background:linear-gradient(135deg, rgba(15,23,42,.82), rgba(8,47,73,.46));
+      border:1px solid rgba(125,211,252,.25);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:34px;
+    }
+    .pill{display:inline-flex; align-items:center; gap:8px; border:1px solid var(--line); padding:9px 14px; border-radius:999px; background:rgba(15,23,42,.65); color:var(--muted); font-weight:700; margin:4px 6px 4px 0}
+    .terminal{
+      background:#020617;
+      color:#d1fae5;
+      border:1px solid rgba(34,197,94,.28);
+      border-radius:20px;
+      box-shadow:0 22px 70px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.03);
+      overflow:hidden;
+      font-family:"Cascadia Code","Fira Code","Consolas",monospace;
+    }
+    .termbar{height:42px; background:#0f172a; display:flex; align-items:center; gap:8px; padding:0 16px; border-bottom:1px solid rgba(148,163,184,.16)}
+    .dot{width:12px; height:12px; border-radius:50%; background:#ef4444}.dot:nth-child(2){background:#f59e0b}.dot:nth-child(3){background:#22c55e}
+    pre{margin:0; padding:22px; font-size:20px; line-height:1.45; white-space:pre-wrap;}
+    code{font-family:"Cascadia Code","Fira Code","Consolas",monospace; color:#bfdbfe;}
+    .cmd{color:#67e8f9}
+    .out{color:#bbf7d0}
+    .comment{color:#94a3b8}
+    .danger-bg{background:rgba(239,68,68,.13); border:1px solid rgba(239,68,68,.32)}
+    .warn-bg{background:rgba(245,158,11,.13); border:1px solid rgba(245,158,11,.32)}
+    .ok-bg{background:rgba(34,197,94,.13); border:1px solid rgba(34,197,94,.32)}
+
+    .nav{
+      position:fixed; left:0; right:0; bottom:0; height:72px;
+      display:flex; align-items:center; justify-content:space-between; padding:12px 28px;
+      background:linear-gradient(0deg, rgba(2,6,23,.96), rgba(2,6,23,.72));
+      border-top:1px solid var(--line); z-index:10; backdrop-filter:blur(14px);
+    }
+    .btn{
+      border:1px solid rgba(125,211,252,.35); background:rgba(14,165,233,.16); color:var(--text);
+      border-radius:16px; padding:12px 18px; font-weight:800; font-size:16px; cursor:pointer;
+      transition:.18s ease; user-select:none;
+    }
+    .btn:hover{transform:translateY(-2px); background:rgba(14,165,233,.28)}
+    .btn.secondary{background:rgba(148,163,184,.1); border-color:var(--line); color:var(--muted)}
+    .btn.good{background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.35)}
+    .btn.warn{background:rgba(245,158,11,.18); border-color:rgba(245,158,11,.35)}
+    .btn.danger{background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.35)}
+    .progress{height:8px; flex:1; max-width:520px; margin:0 22px; background:rgba(148,163,184,.18); border-radius:999px; overflow:hidden;}
+    .progress span{display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:999px; transition:.25s}
+    .counter{font-weight:900; color:var(--muted); min-width:88px; text-align:center}
+
+    .hero{
+      flex:1; display:grid; grid-template-columns:1.05fr .95fr; align-items:center; gap:48px;
+    }
+    .big-icon{font-size:130px; filter:drop-shadow(0 0 35px rgba(56,189,248,.45)); animation:pulse 2.2s infinite ease-in-out;}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    .tree{font-family:"Cascadia Code","Consolas",monospace; font-size:22px; line-height:1.4; color:#dbeafe}
+    .tree span{color:#22c55e}
+    .path{color:#fbbf24}
+
+    .diagram{display:flex; align-items:center; justify-content:center; gap:18px; margin-top:20px; flex-wrap:wrap;}
+    .box{border:1px solid rgba(125,211,252,.3); background:rgba(15,23,42,.7); border-radius:18px; padding:20px 22px; min-width:160px; text-align:center; font-weight:900; font-size:20px;}
+    .arrow{font-size:34px; color:var(--accent)}
+    .compare{width:100%; border-collapse:collapse; overflow:hidden; border-radius:18px; font-size:20px;}
+    .compare th,.compare td{border:1px solid rgba(148,163,184,.18); padding:18px; text-align:left;}
+    .compare th{background:rgba(14,165,233,.16); color:#e0f2fe}
+    .compare td{background:rgba(15,23,42,.55); color:var(--muted)}
+    .compare td:first-child{color:#bae6fd; font-weight:900}
+    .input-row{display:flex; gap:12px; margin:18px 0; flex-wrap:wrap;}
+    input,select{
+      border:1px solid rgba(148,163,184,.28); background:rgba(2,6,23,.7); color:var(--text);
+      border-radius:14px; padding:13px 14px; font-size:18px; outline:none; min-width:220px;
+    }
+    .result{
+      background:rgba(2,6,23,.75); border:1px solid rgba(34,197,94,.25); border-radius:16px; padding:18px;
+      min-height:78px; color:#bbf7d0; font-family:"Cascadia Code","Consolas",monospace; font-size:18px; white-space:pre-wrap;
+    }
+    .mini-question{display:grid; gap:12px; margin-top:18px;}
+    .option{
+      background:rgba(15,23,42,.75); border:1px solid rgba(148,163,184,.22); padding:16px 18px; border-radius:16px; cursor:pointer;
+      font-size:20px; color:var(--muted); transition:.16s ease;
+    }
+    .option:hover{transform:translateX(4px); border-color:rgba(56,189,248,.45); color:var(--text)}
+    .option.correct{background:rgba(34,197,94,.18); border-color:rgba(34,197,94,.55); color:#dcfce7}
+    .option.wrong{background:rgba(239,68,68,.18); border-color:rgba(239,68,68,.55); color:#fee2e2}
+    .badge{display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; background:rgba(56,189,248,.17); border:1px solid rgba(56,189,248,.35); font-weight:900; margin-right:10px;}
+    .lab-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:24px; flex:1; min-height:0;}
+    .terminal-live{height:100%; display:flex; flex-direction:column;}
+    .terminal-output{flex:1; overflow:auto; padding:18px 22px; font-family:"Cascadia Code","Consolas",monospace; font-size:18px; line-height:1.45; white-space:pre-wrap;}
+    .terminal-input{display:flex; border-top:1px solid rgba(148,163,184,.16);}
+    .terminal-input span{padding:15px 0 15px 18px; color:#22c55e; font-family:"Cascadia Code","Consolas",monospace;}
+    .terminal-input input{flex:1; border:0; border-radius:0; background:#020617; font-family:"Cascadia Code","Consolas",monospace; color:#d1fae5; min-width:0;}
+    .cheat{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+    .cheat div{background:rgba(2,6,23,.55); border:1px solid rgba(148,163,184,.18); border-radius:14px; padding:13px 14px; font-family:"Cascadia Code","Consolas",monospace; color:#dbeafe; font-size:17px}
+    .quiz-box{max-width:1000px; margin:auto; width:100%;}
+    .quiz-title{font-size:30px; margin-bottom:20px;}
+    .quiz-actions{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:18px;}
+    .score{font-size:28px; font-weight:900; color:var(--accent2)}
+    .hidden{display:none!important}
+    .center{display:flex; align-items:center; justify-content:center; text-align:center; flex:1;}
+    .small{font-size:18px}
+    .mono{font-family:"Cascadia Code","Consolas",monospace;}
+    .glow{box-shadow:0 0 34px rgba(56,189,248,.18)}
+    .timeline{display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-top:22px;}
+    .time-item{padding:20px; border-radius:18px; background:rgba(15,23,42,.7); border:1px solid rgba(148,163,184,.2); text-align:center;}
+    .time-item strong{display:block; font-size:28px; color:#bae6fd; margin-bottom:8px}
+    .size-meter{height:30px; background:rgba(148,163,184,.15); border-radius:999px; overflow:hidden; margin:12px 0}
+    .size-meter span{display:block; height:100%; background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444); border-radius:999px}
+    @media(max-width:900px){
+      .slide{padding:48px 24px 90px; overflow:auto}
+      h1{font-size:44px} h2{font-size:34px} p,li{font-size:18px}
+      .hero,.row,.lab-grid{grid-template-columns:1fr}
+      .row-3{grid-template-columns:1fr}
+      .cheat{grid-template-columns:1fr}
+      .nav{height:76px; padding:10px}
+      .progress{display:none}
+    }
+
+    /* Padrão visual atual do portal de ISA */
+    :root{
+      --bg:#071018;--panel:#102431;--panel2:#050b10;--text:#eef8ff;
+      --muted:#9eb3c0;--accent:#52e3ff;--accent2:#45e59a;
+      --warn:#ffc857;--danger:#ff7886;--purple:#a78bfa;
+      --line:#294457;--shadow:0 18px 50px rgba(0,0,0,.32);--radius:15px;
+    }
+    html,body{font-family:Inter,system-ui,sans-serif;background:var(--bg)}
+    body:before{
+      background:radial-gradient(circle at 85% 8%,#19354d 0,transparent 35%),var(--bg);
+    }
+    body:after{display:none}
+    .particles{display:none}
+    .topbar{
+      position:fixed;z-index:30;inset:0 0 auto;height:58px;
+      display:flex;align-items:center;padding:0 24px;gap:18px;
+      background:rgba(7,16,24,.92);backdrop-filter:blur(12px);
+      border-bottom:1px solid #294354;
+    }
+    .topbrand{font-weight:800;letter-spacing:.08em;font-size:16px}
+    .topbrand b{color:var(--accent)}
+    .topactions{margin-left:auto;display:flex;gap:8px}
+    .topactions button{
+      border:1px solid #355367;background:#0d1b26;color:var(--text);
+      border-radius:9px;padding:8px 12px;font-weight:700;cursor:pointer;
+    }
+    .topactions button:hover{border-color:var(--accent);color:var(--accent)}
+    .slide{padding:84px max(5vw,48px) 54px;overflow:auto}
+    .slide.active{justify-content:center}
+    .kicker{font-family:"Fira Code",monospace;font-size:13px;color:var(--accent2);letter-spacing:.14em}
+    h1{font-size:clamp(38px,6vw,76px)}
+    h2{font-size:clamp(29px,3.8vw,52px)}
+    h3{font-size:clamp(19px,1.8vw,27px)}
+    p,li{font-size:clamp(15px,1.3vw,20px);line-height:1.5}
+    code,pre,.mono,.tree,.cheat div,.terminal-output,.terminal-input span,.terminal-input input{
+      font-family:"Fira Code",monospace;
+    }
+    .card,.glass{
+      background:linear-gradient(145deg,#102431,#0b1822);
+      border:1px solid #294457;border-radius:15px;box-shadow:var(--shadow);
+      backdrop-filter:none;padding:20px;
+    }
+    .terminal{border-radius:12px;background:#050b10;border:1px solid #274052;border-left:4px solid var(--accent2)}
+    .termbar{height:36px;background:#0d1b26}
+    pre{font-size:clamp(12px,1.05vw,16px);line-height:1.5;padding:17px}
+    .pill{font:600 13px "Fira Code",monospace;border-color:#315064;background:#0d1b26;padding:7px 10px}
+    .big-icon{font-size:96px;animation:none}
+    .btn{border-radius:9px;padding:9px 13px;font-size:14px}
+    .nav{
+      height:42px;padding:0 22px;background:rgba(7,16,24,.93);
+      border-top:1px solid #294354;
+    }
+    .nav .btn{padding:6px 11px;font-size:12px}
+    .progress{
+      position:fixed;z-index:31;top:57px;left:0;width:100%;max-width:none;
+      height:3px;margin:0;border-radius:0;background:transparent;
+    }
+    .progress span{border-radius:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .counter{font:600 12px "Fira Code",monospace;min-width:72px}
+    .compare{font-size:clamp(13px,1.1vw,17px)}
+    .compare th,.compare td{padding:10px 12px}
+    .box,.time-item,.cheat div,.result,.option,input,select{border-radius:10px}
+    .modal{
+      display:none;position:fixed;z-index:50;inset:0;background:rgba(2,7,11,.9);
+      padding:6vh 8vw;
+    }
+    .modal.open{display:block}
+    .modalbox{
+      max-width:1080px;max-height:88vh;overflow:auto;margin:auto;
+      background:#0d1b26;border:1px solid #355367;border-radius:16px;padding:24px;
+    }
+    .modalhead{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .overview-grid button{
+      text-align:left;border:1px solid #294457;background:#102431;color:#dceaf2;
+      border-radius:9px;padding:11px;cursor:pointer;
+    }
+    @media(max-width:900px){
+      .slide{padding:80px 42px 50px}.topactions button:not(:last-child){display:none}
+      .overview-grid{grid-template-columns:1fr 1fr}.progress{display:block}
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbrand"><b>ISA</b> / FIND E LOCATE / DEBIAN 13</div>
+    <div class="topactions">
+      <button type="button" onclick="openOverview()">Visão geral</button>
+      <button type="button" onclick="openSources()">Referências</button>
+      <button type="button" onclick="toggleFullscreen()">Tela cheia</button>
+    </div>
+  </header>
+  <div class="particles" id="particles"></div>
+
+  <main class="deck" id="deck">
+
+    <section class="slide active">
+      <div class="hero">
+        <div>
+          <div class="kicker">Introdução a Sistemas Abertos • Debian 13</div>
+          <h1>Comandos <span class="accent">find</span> e <span class="green">locate</span></h1>
+          <p class="wide">Uma aula interativa sobre como localizar arquivos, diretórios, permissões, tamanhos, datas e padrões dentro do Linux.</p>
+          <div style="margin-top:28px">
+            <span class="pill">🔎 Busca em tempo real</span>
+            <span class="pill">⚡ Busca indexada</span>
+            <span class="pill">🧪 Laboratório</span>
+            <span class="pill">🎮 Quiz final</span>
+          </div>
+        </div>
+        <div class="glass center">
+          <div>
+            <div class="big-icon">🔍</div>
+            <h3>Caça ao arquivo perdido</h3>
+            <p>Ao final da aula, o aluno saberá escolher a ferramenta certa para cada situação.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Problema real</div>
+      <h2>Você sabe que o arquivo existe… mas não sabe onde está</h2>
+      <div class="row">
+        <div class="card">
+          <h3>Imagine o cenário</h3>
+          <p>Um servidor Linux possui milhares de arquivos espalhados em vários diretórios. Você precisa encontrar:</p>
+          <p><code>relatorio_final.pdf</code></p>
+          <p>Procurar manualmente seria lento, cansativo e sujeito a erro.</p>
+        </div>
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ cd /</span>
+<span class="cmd">$ ls</span>
+bin boot dev etc home lib opt root usr var
+<span class="comment"># Por onde começar?</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Duas ferramentas</div>
+      <h2><span class="accent">find</span> e <span class="green">locate</span> resolvem problemas parecidos, mas de formas diferentes</h2>
+      <div class="row">
+        <div class="card ok-bg">
+          <h3>find</h3>
+          <p>Procura percorrendo os diretórios <strong>em tempo real</strong>.</p>
+          <p>É mais poderoso, aceita muitos filtros e pode executar comandos sobre os resultados.</p>
+        </div>
+        <div class="card">
+          <h3>locate</h3>
+          <p>Procura em um <strong>banco de dados indexado</strong>.</p>
+          <p>É muito rápido, mas pode não mostrar arquivos criados recentemente se o índice não estiver atualizado.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:22px">
+        <p><strong>Ideia central:</strong> use <code>find</code> quando precisar de precisão e filtros avançados. Use <code>locate</code> quando quiser velocidade.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Visão mental</div>
+      <h2>O Linux organiza tudo em uma árvore de diretórios</h2>
+      <div class="row">
+        <div class="card tree">
+/<br>
+├── <span>home</span><br>
+│&nbsp;&nbsp;└── <span>aluno</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;├── documentos<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└── <span class="path">relatorio.txt</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;├── scripts<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;└── backup.sh<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;└── downloads<br>
+├── <span>etc</span><br>
+├── <span>var</span><br>
+└── <span>usr</span>
+        </div>
+        <div class="card">
+          <h3>O que o <code>find</code> faz?</h3>
+          <p>Ele começa em um ponto da árvore e vai descendo pelos diretórios, testando cada item contra os critérios definidos.</p>
+          <div class="diagram">
+            <div class="box">Caminho</div><div class="arrow">→</div>
+            <div class="box">Teste</div><div class="arrow">→</div>
+            <div class="box">Resultado</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">find</div>
+      <h2>Sintaxe básica do comando</h2>
+      <div class="terminal glow">
+        <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find [caminho] [opções] [expressão]</span></pre>
+      </div>
+      <div class="row-3" style="margin-top:24px">
+        <div class="card"><h3>1. Caminho</h3><p>Onde a busca começa. Ex.: <code>.</code>, <code>/home</code>, <code>/var/log</code>.</p></div>
+        <div class="card"><h3>2. Opções</h3><p>Ajustam o comportamento. Ex.: profundidade, links, mensagens de erro.</p></div>
+        <div class="card"><h3>3. Expressão</h3><p>Define o que procurar. Ex.: nome, tipo, tamanho, data, permissão.</p></div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Primeiros exemplos</div>
+      <h2>Buscando a partir de diferentes lugares</h2>
+      <div class="row">
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find .</span>
+<span class="comment"># procura a partir do diretório atual</span>
+
+<span class="cmd">$ find /home</span>
+<span class="comment"># procura a partir de /home</span>
+
+<span class="cmd">$ find /var/log</span>
+<span class="comment"># procura dentro dos logs do sistema</span></pre>
+        </div>
+        <div class="card">
+          <h3>O ponto <code>.</code></h3>
+          <p>No Linux, <code>.</code> representa o diretório atual.</p>
+          <p>Por isso, <code>find .</code> significa:</p>
+          <p><strong>“procure daqui para baixo”.</strong></p>
+          <div class="pill">📌 Muito usado em exercícios e scripts</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Interativo</div>
+      <h2>Simulador: procure por nome</h2>
+      <div class="row">
+        <div class="card">
+          <h3>Digite o nome ou parte do arquivo</h3>
+          <p>Teste exemplos como <code>relatorio.txt</code>, <code>backup.sh</code>, <code>.conf</code>, <code>foto</code> ou <code>log</code>.</p>
+          <div class="input-row">
+            <input id="nameSearch" placeholder="ex.: relatorio.txt">
+            <button class="btn good" onclick="simulateFindName()">Executar find</button>
+          </div>
+          <div class="result" id="nameResult">Resultado aparecerá aqui...</div>
+        </div>
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -name "relatorio.txt"</span>
+<span class="out">./documentos/relatorio.txt</span>
+
+<span class="cmd">$ find . -name "*.sh"</span>
+<span class="out">./scripts/backup.sh
+./scripts/verifica_disco.sh</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">-name x -iname</div>
+      <h2>Maiúsculas e minúsculas importam?</h2>
+      <div class="row">
+        <div class="card">
+          <h3><code>-name</code></h3>
+          <p>Busca sensível a maiúsculas e minúsculas.</p>
+          <div class="terminal">
+            <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -name "Relatorio.txt"</span>
+<span class="out">./documentos/Relatorio.txt</span></pre>
+          </div>
+        </div>
+        <div class="card ok-bg">
+          <h3><code>-iname</code></h3>
+          <p>Ignora diferenças entre maiúsculas e minúsculas.</p>
+          <div class="terminal">
+            <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -iname "relatorio.txt"</span>
+<span class="out">./documentos/Relatorio.txt
+./documentos/relatorio.txt</span></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Tipos de arquivo</div>
+      <h2>Filtrando por arquivos, diretórios e links</h2>
+      <div class="row-3">
+        <div class="card">
+          <h3><span class="badge">f</span>Arquivos comuns</h3>
+          <div class="terminal"><div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">$ find . -type f</span></pre></div>
+          <p>Mostra arquivos como <code>.txt</code>, <code>.sh</code>, <code>.pdf</code>.</p>
+        </div>
+        <div class="card">
+          <h3><span class="badge">d</span>Diretórios</h3>
+          <div class="terminal"><div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">$ find . -type d</span></pre></div>
+          <p>Mostra pastas e subpastas.</p>
+        </div>
+        <div class="card">
+          <h3><span class="badge">l</span>Links simbólicos</h3>
+          <div class="terminal"><div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><pre><span class="cmd">$ find . -type l</span></pre></div>
+          <p>Mostra atalhos simbólicos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Extensões</div>
+      <h2>Encontrando arquivos por extensão</h2>
+      <div class="row">
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -name "*.txt"</span>
+<span class="out">./documentos/relatorio.txt
+./aulas/notas.txt</span>
+
+<span class="cmd">$ find . -name "*.pdf"</span>
+<span class="out">./documentos/apostila.pdf
+./downloads/manual.pdf</span>
+
+<span class="cmd">$ find . -name "*.sh"</span>
+<span class="out">./scripts/backup.sh</span></pre>
+        </div>
+        <div class="card">
+          <h3>Atenção às aspas</h3>
+          <p>Use aspas em padrões como <code>"*.txt"</code>.</p>
+          <p>Isso evita que o shell expanda o padrão antes do <code>find</code> executar.</p>
+          <div class="pill">✅ Recomendado: <code>find . -name "*.txt"</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Tamanho</div>
+      <h2>Localizando arquivos grandes ou pequenos</h2>
+      <div class="row">
+        <div class="card">
+          <h3>Operadores de tamanho</h3>
+          <p><code>+100M</code> maior que 100 MB</p>
+          <p><code>-1M</code> menor que 1 MB</p>
+          <p><code>50M</code> exatamente 50 MB, dependendo do arredondamento de blocos</p>
+          <div class="size-meter"><span style="width:80%"></span></div>
+          <p class="small">Útil para descobrir o que está ocupando espaço no disco.</p>
+        </div>
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -type f -size +100M</span>
+<span class="out">./videos/aula-linux.mp4
+./backups/backup-servidor.tar.gz</span>
+
+<span class="cmd">$ find . -type f -size -1M</span>
+<span class="out">./scripts/menu.sh
+./documentos/anotacoes.txt</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Datas</div>
+      <h2>Encontrando arquivos por tempo de modificação</h2>
+      <div class="timeline">
+        <div class="time-item"><strong>-1</strong><span>últimas 24h</span></div>
+        <div class="time-item"><strong>-7</strong><span>últimos 7 dias</span></div>
+        <div class="time-item"><strong>7</strong><span>exatamente 7 dias</span></div>
+        <div class="time-item"><strong>+30</strong><span>mais de 30 dias</span></div>
+        <div class="time-item"><strong>+365</strong><span>mais de 1 ano</span></div>
+      </div>
+      <div class="terminal" style="margin-top:26px">
+        <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -type f -mtime -7</span>
+<span class="comment"># arquivos modificados nos últimos 7 dias</span>
+
+<span class="cmd">$ find . -type f -mtime +30</span>
+<span class="comment"># arquivos modificados há mais de 30 dias</span></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Permissões</div>
+      <h2>Procurando por permissões específicas</h2>
+      <div class="row">
+        <div class="card warn-bg">
+          <h3>Exemplo perigoso</h3>
+          <p><code>777</code> significa leitura, escrita e execução para dono, grupo e outros.</p>
+          <p>Nem sempre é erro, mas em servidores pode representar risco.</p>
+        </div>
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -perm 777</span>
+<span class="out">./publico/script.sh</span>
+
+<span class="cmd">$ find . -type f -perm 644</span>
+<span class="out">./documentos/relatorio.txt</span>
+
+<span class="cmd">$ find . -type f -executable</span>
+<span class="out">./scripts/backup.sh</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Usuário e grupo</div>
+      <h2>Localizando arquivos por dono</h2>
+      <div class="row">
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find /home -user aluno</span>
+<span class="out">/home/aluno/documentos/relatorio.txt
+/home/aluno/scripts/backup.sh</span>
+
+<span class="cmd">$ find /var/www -group www-data</span>
+<span class="out">/var/www/html/index.html</span></pre>
+        </div>
+        <div class="card">
+          <h3>Por que isso é útil?</h3>
+          <p>Em administração Linux, é comum investigar arquivos pertencentes a um usuário, serviço ou grupo específico.</p>
+          <p>Exemplos: <code>www-data</code>, <code>mysql</code>, <code>root</code>, <code>aluno</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Critérios combinados</div>
+      <h2>O poder real aparece quando combinamos filtros</h2>
+      <div class="terminal glow">
+        <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -type f -name "*.log" -size +10M</span>
+<span class="comment"># arquivos comuns, com extensão .log, maiores que 10 MB</span>
+
+<span class="cmd">$ find /home -type f -iname "*.pdf" -mtime -30</span>
+<span class="comment"># PDFs modificados nos últimos 30 dias</span>
+
+<span class="cmd">$ find /var/log -type f -name "*.log" -user root</span>
+<span class="comment"># logs pertencentes ao usuário root</span></pre>
+      </div>
+      <div class="diagram">
+        <div class="box">Tipo</div><div class="arrow">+</div>
+        <div class="box">Nome</div><div class="arrow">+</div>
+        <div class="box">Tamanho</div><div class="arrow">=</div>
+        <div class="box">Busca precisa</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Ações com -exec</div>
+      <h2>O <code>find</code> também pode executar comandos</h2>
+      <div class="row">
+        <div class="card danger-bg">
+          <h3>⚠️ Cuidado</h3>
+          <p>O parâmetro <code>-exec</code> permite executar comandos nos arquivos encontrados.</p>
+          <p>Isso é poderoso, mas comandos como <code>rm</code> podem apagar arquivos em massa.</p>
+          <p>Antes de apagar, sempre teste imprimindo os resultados.</p>
+        </div>
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find . -name "*.tmp"</span>
+<span class="comment"># primeiro confira</span>
+
+<span class="cmd">$ find . -name "*.tmp" -exec rm {} \;</span>
+<span class="comment"># {} representa cada arquivo encontrado</span>
+
+<span class="cmd">$ find . -name "*.sh" -exec chmod +x {} \;</span>
+<span class="comment"># torna scripts executáveis</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Locate</div>
+      <h2>O <code>locate</code> é rápido porque usa um índice</h2>
+      <div class="glass">
+        <div class="diagram">
+          <div class="box">Sistema de arquivos</div><div class="arrow">→</div>
+          <div class="box">updatedb</div><div class="arrow">→</div>
+          <div class="box">Banco de dados</div><div class="arrow">→</div>
+          <div class="box">locate</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:24px">
+        <p><strong>Analogia:</strong> o <code>locate</code> funciona como consultar o índice de um livro. É rápido, mas o índice precisa estar atualizado.</p>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">updatedb</div>
+      <h2>Atualizando o banco usado pelo locate</h2>
+      <div class="row">
+        <div class="terminal">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ locate relatorio.txt</span>
+<span class="out">/home/aluno/documentos/relatorio.txt</span>
+
+<span class="cmd">$ sudo apt update</span>
+<span class="cmd">$ sudo apt install plocate</span>
+<span class="comment"># instala locate e updatedb no Debian 13</span>
+
+<span class="cmd">$ sudo updatedb</span>
+<span class="comment"># atualiza o índice de busca</span>
+
+<span class="cmd">$ locate backup.sh</span>
+<span class="out">/home/aluno/scripts/backup.sh</span></pre>
+        </div>
+        <div class="card">
+          <h3>Quando usar <code>updatedb</code>?</h3>
+          <p>Quando você criou, moveu ou removeu arquivos recentemente e quer que o <code>locate</code> reflita essas mudanças.</p>
+          <p><strong>No Debian 13:</strong> instale o pacote <code>plocate</code> caso os comandos <code>locate</code> e <code>updatedb</code> ainda não existam.</p>
+          <p>Em muitas distribuições, essa atualização já ocorre automaticamente por agendamento.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Comparação</div>
+      <h2>Find x Locate</h2>
+      <table class="compare">
+        <thead><tr><th>Critério</th><th>find</th><th>locate</th></tr></thead>
+        <tbody>
+          <tr><td>Velocidade</td><td>Mais lento em árvores grandes</td><td>Muito rápido</td></tr>
+          <tr><td>Fonte da busca</td><td>Sistema de arquivos real</td><td>Banco de dados indexado</td></tr>
+          <tr><td>Atualização</td><td>Resultado atual</td><td>Pode depender do updatedb</td></tr>
+          <tr><td>Filtros</td><td>Muito avançados</td><td>Mais simples</td></tr>
+          <tr><td>Ações</td><td>Pode usar -exec</td><td>Normalmente só lista resultados</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Escolha a ferramenta</div>
+      <h2>Jogo rápido: qual comando você usaria?</h2>
+      <div class="card">
+        <h3 id="choiceScenario">Situação aparecerá aqui</h3>
+        <div class="input-row">
+          <button class="btn" onclick="answerChoice('find')">find</button>
+          <button class="btn good" onclick="answerChoice('locate')">locate</button>
+          <button class="btn secondary" onclick="nextChoice()">Nova situação</button>
+        </div>
+        <div class="result" id="choiceFeedback">Clique em “Nova situação” para começar.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Laboratório guiado</div>
+      <h2>Mini terminal interativo</h2>
+      <div class="lab-grid">
+        <div class="terminal terminal-live">
+          <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+          <div class="terminal-output" id="liveOut">Bem-vindo ao laboratório simulado.
+Digite comandos como:
+find . -name "*.txt"
+find . -type d
+find . -size +100M
+locate relatorio
+sudo updatedb
+help
+</div>
+          <div class="terminal-input">
+            <span>aluno@linux:~$</span>
+            <input id="liveCmd" autocomplete="off" placeholder="digite um comando e pressione Enter">
+          </div>
+        </div>
+        <div class="card">
+          <h3>Desafios</h3>
+          <p><span class="badge">1</span>Encontre todos os arquivos <code>.txt</code>.</p>
+          <p><span class="badge">2</span>Liste apenas diretórios.</p>
+          <p><span class="badge">3</span>Procure arquivos maiores que 100 MB.</p>
+          <p><span class="badge">4</span>Use <code>locate</code> para procurar <code>backup</code>.</p>
+          <p class="small">Este terminal é simulado para fins didáticos.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Boas práticas</div>
+      <h2>Cuidados importantes em aula e em servidores reais</h2>
+      <div class="row-3">
+        <div class="card">
+          <h3>1. Teste antes</h3>
+          <p>Antes de usar <code>-exec rm</code>, rode o <code>find</code> sem apagar nada.</p>
+        </div>
+        <div class="card">
+          <h3>2. Use aspas</h3>
+          <p>Prefira <code>"*.log"</code>, <code>"*.txt"</code> e padrões protegidos por aspas.</p>
+        </div>
+        <div class="card">
+          <h3>3. Redirecione erros</h3>
+          <p>Em buscas no <code>/</code>, use <code>2&gt;/dev/null</code> para ocultar erros de permissão.</p>
+        </div>
+      </div>
+      <div class="terminal" style="margin-top:24px">
+        <div class="termbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+<pre><span class="cmd">$ find / -name "*.conf" 2&gt;/dev/null</span>
+<span class="comment"># procura arquivos .conf e oculta mensagens de permissão negada</span></pre>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Cheat sheet</div>
+      <h2>Resumo para consulta rápida</h2>
+      <div class="cheat">
+        <div>find . -name "arquivo.txt"</div>
+        <div>find . -iname "arquivo.txt"</div>
+        <div>find . -type f</div>
+        <div>find . -type d</div>
+        <div>find . -name "*.pdf"</div>
+        <div>find . -size +100M</div>
+        <div>find . -mtime -7</div>
+        <div>find . -perm 777</div>
+        <div>find . -user aluno</div>
+        <div>find . -name "*.sh" -exec chmod +x {} \;</div>
+        <div>locate relatorio</div>
+        <div>sudo updatedb</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">Quiz final</div>
+      <h2>Teste seus conhecimentos</h2>
+      <div class="quiz-box card">
+        <div class="quiz-title" id="quizQuestion">Pergunta</div>
+        <div class="mini-question" id="quizOptions"></div>
+        <div class="quiz-actions">
+          <button class="btn secondary" onclick="restartQuiz()">Reiniciar</button>
+          <div class="score" id="quizScore">0/10</div>
+          <button class="btn good" onclick="nextQuiz()">Próxima</button>
+        </div>
+        <div class="result" id="quizFeedback" style="margin-top:16px">Escolha uma alternativa.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="center">
+        <div class="glass wide">
+          <div class="big-icon">🏆</div>
+          <h1>Missão concluída</h1>
+          <p>Agora você conhece duas ferramentas fundamentais para localizar informações em sistemas Linux.</p>
+          <div class="row" style="margin-top:24px; text-align:left">
+            <div class="card"><h3>Use find quando...</h3><p>precisar de filtros avançados, precisão, busca atual ou ações com <code>-exec</code>.</p></div>
+            <div class="card"><h3>Use locate quando...</h3><p>precisar encontrar rapidamente caminhos conhecidos ou nomes de arquivos.</p></div>
+          </div>
+          <p style="margin-top:24px"><strong>Frase final:</strong> quem domina busca no Linux economiza tempo, evita erros e administra sistemas com mais segurança.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="nav">
+    <button class="btn secondary" onclick="prevSlide()">◀ Anterior</button>
+    <div class="progress"><span id="progressBar"></span></div>
+    <div class="counter" id="counter">1/24</div>
+    <button class="btn" onclick="nextSlide()">Próximo ▶</button>
+  </nav>
+
+  <div class="modal" id="overviewModal">
+    <div class="modalbox">
+      <div class="modalhead"><h3>Visão geral</h3><button class="btn secondary" onclick="closeModals()">Fechar</button></div>
+      <div class="overview-grid" id="overviewGrid"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="sourcesModal">
+    <div class="modalbox">
+      <div class="modalhead"><h3>Referências</h3><button class="btn secondary" onclick="closeModals()">Fechar</button></div>
+      <p>Documentação de consulta para os comandos apresentados:</p>
+      <div class="row">
+        <div class="card"><h3>GNU findutils</h3><p><a class="accent" href="https://www.gnu.org/software/findutils/manual/" target="_blank">Manual oficial do find</a></p></div>
+        <div class="card"><h3>Debian 13</h3><p><a class="green" href="https://packages.debian.org/trixie/plocate" target="_blank">Pacote plocate no Debian</a></p></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let current = 0;
+
+  function showSlide(i){
+    current = Math.max(0, Math.min(slides.length-1, i));
+    slides.forEach((s,idx)=>s.classList.toggle('active', idx===current));
+    document.getElementById('counter').textContent = `${current+1}/${slides.length}`;
+    document.getElementById('progressBar').style.width = `${((current+1)/slides.length)*100}%`;
+    history.replaceState(null,'','#'+(current+1));
+  }
+  function nextSlide(){ showSlide(current+1); }
+  function prevSlide(){ showSlide(current-1); }
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); nextSlide(); }
+    if(e.key === 'ArrowLeft' || e.key === 'PageUp') prevSlide();
+    if(e.key.toLowerCase() === 'o') openOverview();
+    if(e.key === 'Escape') closeModals();
+  });
+  function openOverview(){ document.getElementById('overviewModal').classList.add('open'); }
+  function openSources(){ document.getElementById('sourcesModal').classList.add('open'); }
+  function closeModals(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open')); }
+  function toggleFullscreen(){
+    if(document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  }
+  const overviewGrid=document.getElementById('overviewGrid');
+  slides.forEach((slide,index)=>{
+    const button=document.createElement('button');
+    const title=slide.querySelector('h1,h2')?.textContent.trim() || 'Slide';
+    button.textContent=String(index+1).padStart(2,'0')+' — '+title;
+    button.onclick=()=>{showSlide(index);closeModals();};
+    overviewGrid.appendChild(button);
+  });
+  const initialSlide=parseInt(location.hash.slice(1));
+  showSlide(Number.isFinite(initialSlide)?initialSlide-1:0);
+
+  const particles = document.getElementById('particles');
+  for(let i=0;i<42;i++){
+    const p=document.createElement('span');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(7+Math.random()*12)+'s';
+    p.style.animationDelay=(-Math.random()*12)+'s';
+    p.style.opacity=.3+Math.random()*.7;
+    particles.appendChild(p);
+  }
+
+  const files = [
+    './documentos/relatorio.txt',
+    './documentos/Relatorio.txt',
+    './documentos/apostila.pdf',
+    './downloads/manual.pdf',
+    './downloads/foto-aula.png',
+    './scripts/backup.sh',
+    './scripts/verifica_disco.sh',
+    './logs/sistema.log',
+    './logs/acesso.log',
+    './backups/backup-servidor.tar.gz',
+    './videos/aula-linux.mp4',
+    './config/app.conf'
+  ];
+
+  function simulateFindName(){
+    const q = document.getElementById('nameSearch').value.trim();
+    const out = document.getElementById('nameResult');
+    if(!q){ out.textContent = 'Digite um nome ou padrão para procurar.'; return; }
+    let cleaned = q.replaceAll('"','').replace('*','').toLowerCase();
+    let res = files.filter(f => f.toLowerCase().includes(cleaned));
+    if(q.includes('*.txt')) res = files.filter(f => f.endsWith('.txt'));
+    if(q.includes('*.pdf')) res = files.filter(f => f.endsWith('.pdf'));
+    if(q.includes('*.sh')) res = files.filter(f => f.endsWith('.sh'));
+    if(q.includes('*.log')) res = files.filter(f => f.endsWith('.log'));
+    out.textContent = '$ find . -name "'+q+'"\n' + (res.length ? res.join('\n') : 'nenhum resultado encontrado');
+  }
+
+  const choices = [
+    {s:'Preciso encontrar arquivos .log maiores que 10 MB dentro de /var/log.', a:'find', f:'Correto: find permite combinar tipo, nome, tamanho e caminho.'},
+    {s:'Quero localizar rapidamente onde está um arquivo chamado passwd.', a:'locate', f:'Correto: locate é excelente para buscas rápidas por nome.'},
+    {s:'Acabei de criar um arquivo e preciso encontrá-lo agora.', a:'find', f:'Correto: find consulta o sistema de arquivos real, sem depender de índice.'},
+    {s:'Quero procurar todos os arquivos com permissão 777.', a:'find', f:'Correto: find possui filtro por permissões.'},
+    {s:'Quero uma busca muito rápida por todos os caminhos que contêm “python”.', a:'locate', f:'Correto: locate usa índice e costuma ser muito rápido.'}
+  ];
+  let choiceIndex = -1;
+  function nextChoice(){
+    choiceIndex = (choiceIndex + 1) % choices.length;
+    document.getElementById('choiceScenario').textContent = choices[choiceIndex].s;
+    document.getElementById('choiceFeedback').textContent = 'Escolha find ou locate.';
+  }
+  function answerChoice(ans){
+    if(choiceIndex < 0) nextChoice();
+    const c = choices[choiceIndex];
+    document.getElementById('choiceFeedback').textContent = ans === c.a ? '✅ ' + c.f : '❌ Melhor escolha: ' + c.a + '. ' + c.f;
+  }
+
+  const liveCmd = document.getElementById('liveCmd');
+  const liveOut = document.getElementById('liveOut');
+  const commandMap = [
+    {test:/^help$/i, out:'Comandos simulados:\nfind . -name "*.txt"\nfind . -type d\nfind . -type f\nfind . -size +100M\nfind . -mtime -7\nlocate relatorio\nlocate backup\nsudo updatedb'},
+    {test:/find\s+\.\s+-name\s+["']?\*\.txt["']?/i, out:'./documentos/relatorio.txt\n./aulas/notas.txt'},
+    {test:/find\s+\.\s+-name\s+["']?\*\.pdf["']?/i, out:'./documentos/apostila.pdf\n./downloads/manual.pdf'},
+    {test:/find\s+\.\s+-name\s+["']?\*\.sh["']?/i, out:'./scripts/backup.sh\n./scripts/verifica_disco.sh'},
+    {test:/find\s+\.\s+-type\s+d/i, out:'./documentos\n./downloads\n./scripts\n./logs\n./backups\n./videos'},
+    {test:/find\s+\.\s+-type\s+f/i, out:'./documentos/relatorio.txt\n./scripts/backup.sh\n./logs/sistema.log\n./videos/aula-linux.mp4'},
+    {test:/find\s+\.\s+-size\s+\+100M/i, out:'./videos/aula-linux.mp4\n./backups/backup-servidor.tar.gz'},
+    {test:/find\s+\.\s+-mtime\s+-7/i, out:'./documentos/relatorio.txt\n./scripts/verifica_disco.sh\n./logs/acesso.log'},
+    {test:/locate\s+relatorio/i, out:'/home/aluno/documentos/relatorio.txt\n/home/aluno/documentos/Relatorio.txt'},
+    {test:/locate\s+backup/i, out:'/home/aluno/scripts/backup.sh\n/home/aluno/backups/backup-servidor.tar.gz'},
+    {test:/sudo\s+updatedb/i, out:'Banco de dados atualizado com sucesso.'}
+  ];
+  if(liveCmd){
+    liveCmd.addEventListener('keydown', e=>{
+      if(e.key !== 'Enter') return;
+      const cmd = liveCmd.value.trim();
+      if(!cmd) return;
+      let match = commandMap.find(c=>c.test.test(cmd));
+      liveOut.textContent += `\naluno@linux:~$ ${cmd}\n${match ? match.out : 'Comando não reconhecido neste simulador. Digite help para ver opções.'}\n`;
+      liveCmd.value='';
+      liveOut.scrollTop = liveOut.scrollHeight;
+    });
+  }
+
+  const quiz = [
+    {q:'Qual comando faz busca em tempo real no sistema de arquivos?', o:['locate','find','updatedb','grep'], a:1, f:'find percorre os diretórios no momento da execução.'},
+    {q:'Qual comando depende de um banco de dados indexado?', o:['find','cat','locate','chmod'], a:2, f:'locate usa um índice, geralmente atualizado pelo updatedb.'},
+    {q:'Qual opção ignora maiúsculas e minúsculas no find?', o:['-name','-iname','-case','-ignore'], a:1, f:'-iname faz busca case-insensitive.'},
+    {q:'Como procurar apenas diretórios com find?', o:['find . -type f','find . -type d','find . -dir','find . -folder'], a:1, f:'-type d filtra diretórios.'},
+    {q:'Como procurar arquivos comuns?', o:['find . -type f','find . -type d','find . -name d','find . -files'], a:0, f:'-type f filtra arquivos comuns.'},
+    {q:'Qual comando atualiza o índice usado pelo locate?', o:['sudo update','sudo updatedb','locate -u','find --update'], a:1, f:'updatedb atualiza o banco de dados consultado pelo locate.'},
+    {q:'O que significa find . -size +100M?', o:['Arquivos menores que 100 MB','Arquivos maiores que 100 MB','Arquivos com 100 linhas','Arquivos criados há 100 minutos'], a:1, f:'+100M significa maior que 100 megabytes.'},
+    {q:'Qual opção busca arquivos modificados recentemente?', o:['-mtime','-perm','-user','-exec'], a:0, f:'-mtime filtra por tempo de modificação em dias.'},
+    {q:'Em find . -exec rm {} \\;, o que representa {}?', o:['O diretório atual','Cada arquivo encontrado','O usuário atual','O código de erro'], a:1, f:'{} é substituído por cada caminho encontrado.'},
+    {q:'Qual ferramenta é melhor para filtros avançados como permissão, tamanho e usuário?', o:['locate','find','pwd','echo'], a:1, f:'find é a ferramenta mais poderosa para critérios avançados.'}
+  ];
+  let qi=0, qs=0, answered=false;
+  function renderQuiz(){
+    answered=false;
+    document.getElementById('quizQuestion').textContent = `${qi+1}. ${quiz[qi].q}`;
+    const opts = document.getElementById('quizOptions');
+    opts.innerHTML='';
+    quiz[qi].o.forEach((opt,idx)=>{
+      const div=document.createElement('div');
+      div.className='option';
+      div.textContent=opt;
+      div.onclick=()=>selectQuiz(idx, div);
+      opts.appendChild(div);
+    });
+    document.getElementById('quizFeedback').textContent='Escolha uma alternativa.';
+    document.getElementById('quizScore').textContent=`${qs}/${quiz.length}`;
+  }
+  function selectQuiz(idx, el){
+    if(answered) return;
+    answered=true;
+    const correct=quiz[qi].a;
+    [...document.querySelectorAll('#quizOptions .option')].forEach((o,i)=>{
+      if(i===correct) o.classList.add('correct');
+      if(i===idx && i!==correct) o.classList.add('wrong');
+    });
+    if(idx===correct){ qs++; document.getElementById('quizFeedback').textContent='✅ Correto! ' + quiz[qi].f; }
+    else{ document.getElementById('quizFeedback').textContent='❌ Incorreto. ' + quiz[qi].f; }
+    document.getElementById('quizScore').textContent=`${qs}/${quiz.length}`;
+  }
+  function nextQuiz(){
+    if(qi < quiz.length-1){ qi++; renderQuiz(); }
+    else{
+      const pct = Math.round((qs/quiz.length)*100);
+      document.getElementById('quizQuestion').textContent = `Resultado final: ${qs}/${quiz.length} (${pct}%)`;
+      document.getElementById('quizOptions').innerHTML = `<div class="card ok-bg"><h3>${pct>=80?'🏆 Mestre da busca Linux':pct>=60?'🥈 Explorador Linux':'🥉 Continue praticando'}</h3><p>${pct>=80?'Excelente domínio de find e locate!':pct>=60?'Bom resultado. Revise os exemplos de filtros avançados.':'Reveja a diferença entre find e locate e pratique no laboratório.'}</p></div>`;
+      document.getElementById('quizFeedback').textContent='Clique em Reiniciar para tentar novamente.';
+    }
+  }
+  function restartQuiz(){ qi=0; qs=0; renderQuiz(); }
+  renderQuiz();
+</script>
+<script src="command-help.v1.js"></script>
+</body>
+</html>
